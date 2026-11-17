@@ -95,7 +95,6 @@ const STEPS=[
  {t:"Hola",intro:true},
  {t:"Sobre ti",d:"Para saber a quién le preparo la app.",f:[
   {id:"nombre",l:"¿Cómo te llamas?",ty:"text",req:1},
-  {id:"contacto",l:"Tu email o WhatsApp",h:"Para poder responderte y enviarte la app",ty:"text",req:1},
   {id:"origen",l:"¿Desde qué país o ciudad sales?",ty:"text"},
   {id:"pasaporte",l:"¿Con qué pasaporte viajas?",h:"La nacionalidad, para revisar si necesitas visado",ty:"text"},
   {id:"idiomas",l:"¿Qué idiomas hablas?",ty:"chips",o:["Español","Inglés","Francés","Portugués","Italiano","Alemán","Otro"]},
@@ -193,7 +192,7 @@ function render(){
   if(s.intro){
     h=`<h1>Tu viaje, diseñado a mano</h1>
     <p class="lead">Una app creada solo para ti. Con tus respuestas diseñaré tu propia app de viaje, con tu itinerario, tus lugares en el mapa, cómo moverte y todo lo práctico, y con detalles pensados para ti. Sirve para cualquier viaje: una ciudad, un tour, una ruta a pie o una aventura.</p>
-    <p>Son ${n} pasos cortos, unos 10 minutos. Solo son obligatorios tu nombre y tu contacto: si algo no lo sabes, déjalo en blanco. Para quitar una opción marcada, tócala otra vez.</p>
+    <p>Son ${n} pasos cortos, unos 10 minutos. Solo es obligatorio tu nombre: si algo no lo sabes, déjalo en blanco. Para quitar una opción marcada, tócala otra vez.</p>
     <p class="note">Tus respuestas se guardan en este navegador mientras escribes, así que puedes cerrar y seguir después. Solo usaré tus respuestas para preparar tu viaje y no las compartiré con nadie.</p>`;
   }else if(s.final){
     const txt=summary(),sent=getSent(),same=sent&&sent.hash===JSON.stringify(A);
@@ -227,7 +226,8 @@ async function sendNow(){
   const pb=document.getElementById("post"),ok=document.getElementById("pok"),fb=document.getElementById("fb");
   pb.disabled=true;pb.textContent="Enviando…";ok.style.color="";ok.textContent="";fb.hidden=true;
   let t0=0;try{t0=+localStorage.getItem(KEY+"-t0")||0}catch(e){}
-  const body=JSON.stringify({...A,_hp:document.getElementById("web").value,_secs:t0?Math.round((Date.now()-t0)/1000):0});
+  let id="";try{id=localStorage.getItem(KEY+"-id")||"";if(!id){id=Date.now().toString(36)+Math.random().toString(36).slice(2,8);localStorage.setItem(KEY+"-id",id)}}catch(e){id="x"+Date.now().toString(36)}
+  const body=JSON.stringify({...A,_hp:document.getElementById("web").value,_secs:t0?Math.round((Date.now()-t0)/1000):0,_id:id});
   try{
     if(!CONFIG.endpoint)throw new Error("sin conexión configurada");
     const r=await fetch(CONFIG.endpoint,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body});
