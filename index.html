@@ -263,15 +263,40 @@ function summary(){
 f.addEventListener("submit",e=>e.preventDefault());
 const norm=x=>x.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
 const PN=PLACES.map(p=>[p,norm(p)]);
-function suggest(inp){
-  const box=document.getElementById(inp.id+"-sug"),parts=inp.value.split(","),qv=norm(parts[parts.length-1]);
-  if(qv.length<2){box.hidden=true;inp.setAttribute("aria-expanded","false");return}
+const remoteCache={};let remoteT=0,remoteSeq=0;
+function renderSug(inp,list){
+  const box=document.getElementById(inp.id+"-sug");
+  if(!list.length){box.hidden=true;inp.setAttribute("aria-expanded","false");return}
+  box.innerHTML=list.map((o,i)=>`<button type="button" role="option" data-v="${esc(o.v)}"${i?"":' class="on"'}><span>${esc(o.a)}</span>${o.b?`<small>${esc(o.b)}</small>`:""}</button>`).join("");
+  box.hidden=false;inp.setAttribute("aria-expanded","true");
+}
+function localMatches(qv){
   const starts=[],words=[],inside=[];
   for(const [p,n] of PN){if(n.startsWith(qv))starts.push(p);else if(n.split(/[\s,]+/).some(w=>w.startsWith(qv)))words.push(p);else if(n.includes(qv))inside.push(p)}
-  const r=[...starts,...words,...inside].slice(0,6);
-  if(!r.length){box.hidden=true;inp.setAttribute("aria-expanded","false");return}
-  box.innerHTML=r.map((p,i)=>{const [a,...b]=p.split(", ");return `<button type="button" role="option" data-v="${esc(b.length?a+" ("+b.join(", ")+")":a)}"${i?"":' class="on"'}><span>${esc(a)}</span>${b.length?`<small>${esc(b.join(", "))}</small>`:""}</button>`}).join("");
-  box.hidden=false;inp.setAttribute("aria-expanded","true");
+  return [...starts,...words,...inside].slice(0,5).map(p=>{const [a,...b]=p.split(", ");return {a,b:b.join(", "),v:b.length?a+" ("+b.join(", ")+")":a}});
+}
+async function remoteMatches(q){
+  if(remoteCache[q])return remoteCache[q];
+  const r=await fetch("https://photon.komoot.io/api/?limit=8&osm_tag=place&q="+encodeURIComponent(q));
+  const j=await r.json();
+  const out=[],seen=new Set();
+  for(const f of j.features||[]){const p=f.properties||{};if(!p.name)continue;
+    const parts=[p.state,p.country].filter((x,i,arr)=>x&&x!==p.name&&arr.indexOf(x)===i);
+    const key=norm(p.name+"|"+parts.join("|"));if(seen.has(key))continue;seen.add(key);
+    out.push({a:p.name,b:parts.join(", "),v:p.country&&p.country!==p.name?p.name+" ("+p.country+")":p.name})}
+  return remoteCache[q]=out;
+}
+function suggest(inp){
+  const parts=inp.value.split(","),raw=parts[parts.length-1].trim(),qv=norm(raw);
+  clearTimeout(remoteT);const seq=++remoteSeq;
+  if(qv.length<2){renderSug(inp,[]);return}
+  const loc=localMatches(qv);renderSug(inp,loc);
+  if(qv.length<3)return;
+  remoteT=setTimeout(async()=>{
+    try{const rem=await remoteMatches(raw);if(seq!==remoteSeq)return;
+      const have=new Set(loc.map(o=>norm(o.a)));
+      renderSug(inp,[...loc,...rem.filter(o=>!have.has(norm(o.a)))].slice(0,8))}catch(e){}
+  },350);
 }
 function pick(inp,val){const parts=inp.value.split(",");parts[parts.length-1]=" "+val;inp.value=parts.join(",").replace(/^\s+/,"")+", ";
   const box=document.getElementById(inp.id+"-sug");box.hidden=true;inp.setAttribute("aria-expanded","false");inp.focus();collect()}
