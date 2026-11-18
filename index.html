@@ -52,6 +52,27 @@ input:focus,textarea:focus,select:focus,.chip:focus-within,button:focus-visible{
 .sug button+button{border-top:1px solid var(--line)}
 .sug button:hover,.sug button.on{background:var(--blue2)}
 .sug small{color:var(--soft);font-weight:400;white-space:nowrap}
+.cgrp{font-size:13px;font-weight:600;color:var(--soft);margin:14px 0 8px}
+.cgrp:first-of-type{margin-top:4px}
+.cgrp+.chips{gap:6px}
+.cgrp+.chips .chip{font-size:14px;padding:6px 12px;min-height:40px}
+.styles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.sty{position:relative;display:flex;flex-direction:column;gap:2px;padding:8px 8px 10px;border:1.5px solid var(--line);border-radius:14px;background:var(--card);cursor:pointer}
+.sty input{position:absolute;opacity:0;pointer-events:none}
+.sty.surp{grid-column:1/-1}
+.sty:has(input:checked){border-color:var(--blue);box-shadow:0 0 0 2px var(--blue)}
+.sty:has(input:checked) .sname::after{content:" ✓";color:var(--blue)}
+.sty:focus-within{outline:3px solid color-mix(in srgb,var(--blue) 45%,transparent);outline-offset:2px}
+.mock{position:relative;display:block;height:64px;border-radius:9px;border:1px solid rgba(20,33,61,.12);overflow:hidden;margin-bottom:6px}
+.mbar{position:absolute;left:8px;top:9px;width:46%;height:8px;border-radius:4px}
+.mline{position:absolute;left:8px;top:24px;width:70%;height:5px;border-radius:3px;opacity:.8}
+.mline.short{top:34px;width:50%}
+.mpill{position:absolute;right:8px;bottom:8px;width:30%;height:12px;border-radius:6px}
+.dots{position:absolute;left:8px;bottom:9px;display:flex;gap:4px}
+.dots i{width:10px;height:10px;border-radius:50%;border:1px solid rgba(255,255,255,.6)}
+.q-mark{position:absolute;right:14px;top:50%;transform:translateY(-50%);font:400 40px/1 "DM Serif Display",Georgia,serif;color:#1c3fa0}
+.sname{font-weight:600;font-size:15px;line-height:1.25}
+.sdesc{font-size:13px;color:var(--soft);line-height:1.3}
 .cnt{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
 .cnt .lab{font-weight:600}
 .step3{display:flex;align-items:center;gap:10px}
@@ -83,7 +104,7 @@ button[hidden]{display:none}
 @keyframes in{from{opacity:0;transform:translateY(8px)}}
 @media (prefers-reduced-motion:reduce){.step{animation:none}.bar i{transition:none}}
 .send{display:grid;gap:10px;margin:18px 0}
-.send a,.send button{display:flex;align-items:center;justify-content:center;min-height:52px;border-radius:12px;font-weight:600;text-decoration:none;max-width:none}
+.send>button{display:flex;align-items:center;justify-content:center;min-height:52px;border-radius:12px;font-weight:600;text-decoration:none;max-width:none}
 .wa{background:#1f9e55;color:#fff}.em{background:var(--blue);color:#fff}
 :root[data-theme=dark] .em{color:#0c1730}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
@@ -162,15 +183,26 @@ const STEPS=[
   {id:"presu",c:"Gasto diario",l:"Gasto diario por persona, sin alojamiento",ty:"radio",o:["Menos de 50 €","50–100 €","100–200 €","Más de 200 €","Prefiero no decirlo"]},
   {id:"pago",c:"Forma de pago",l:"¿Cómo pagarás normalmente?",ty:"chips",o:["Tarjeta","Efectivo","Móvil (Apple/Google Pay)"]}]},
  {t:"Tu app",d:"Último paso.",f:[
+  {id:"nombre_app",c:"Nombre de la app",l:"¿Cómo quieres que se llame tu app?",h:"Opcional. Si no se te ocurre, te propongo uno",ty:"text"},
+  {id:"estilo",c:"Estilo de la app",l:"¿Qué estilo te gusta más?",h:"Toca el que más te guste. Si no lo tienes claro, «Sorpréndeme»",ty:"style",o:[
+   {v:"Sorpréndeme",d:"Lo elijo yo pensando en ti",bg:"#ffffff",c:["#e5402b","#1c3fa0","#c9952b","#2f9e6a"],surprise:1},
+   {v:"Noche elegante",d:"Oscuro, azules y dorado",bg:"#0f1522",c:["#8fa3bf","#c9a44c","#2a3a5c"]},
+   {v:"Luminoso",d:"Blanco, azul y toques de color",bg:"#ffffff",c:["#1c3fa0","#e5402b","#cfe0f7"]},
+   {v:"Cálido mediterráneo",d:"Cremas, terracota y oliva",bg:"#f6efe3",c:["#c2603b","#7a8b4a","#e3cfa8"]},
+   {v:"Naturaleza y aventura",d:"Verdes, tierra y cielo",bg:"#e9f0e6",c:["#3e6b48","#8a6a45","#9cc3d5"]}]},
   {id:"movil",c:"Móvil",l:"Tu teléfono",ty:"radio",o:["iPhone","Android"]},
   {id:"datos",c:"Internet en el viaje",l:"¿Tendrás internet en el móvil durante el viaje?",ty:"radio",o:["Sí","Solo con wifi","No lo sé"]},
   {id:"app_idioma",c:"Idioma de la app",l:"¿En qué idioma quieres la app?",ty:"radio",o:["Español","Inglés","Otro"]},
   {id:"app_idioma_otro",c:"Otro idioma de la app",l:"¿En qué otro idioma?",ty:"text",if:["app_idioma",["Otro"]]},
-  {id:"app_cosas",c:"Qué quiere en la app",l:"¿Qué quieres que tenga tu app?",h:"Si no lo sabes, déjalo: incluiré lo esencial",ty:"chips",o:["Itinerario día a día","Mapa con mis lugares","Horarios de transporte","Restaurantes recomendados","Entradas y reservas","Lista de equipaje","Control de gastos","Moneda y cambio","Frases útiles en el idioma local","Documentos y visados","Teléfonos de emergencia","Funcionar sin internet","Tiempo y qué ropa llevar"]},
+  {id:"app_cosas",c:"Qué quiere en la app",l:"¿Qué quieres que tenga tu app?",h:"Toca todo lo que te sirva. Si no lo sabes, déjalo: incluiré lo esencial",ty:"chips",g:[
+   ["Para organizarte",["Itinerario día a día","Cuenta atrás para el viaje","Lista de tareas antes de salir","Mis reservas y entradas","Horarios de transporte","Documentos y visados"]],
+   ["Durante el viaje",["Mapa con mis lugares","Conversor de monedas","Control de gastos","Tiempo y qué ropa llevar","Lista de equipaje","Frases útiles en el idioma local","Teléfonos de emergencia","Funcionar sin internet"]],
+   ["Para descubrir",["Restaurantes recomendados","Lugares secretos y poco conocidos","Excursiones de un día","Fotos de cada destino"]]]},
   {id:"reservas",c:"Reservas hechas",l:"¿Ya tienes entradas o reservas hechas?",ty:"radio",o:["No","Sí, te las mando por WhatsApp"]},
   {id:"comentarios",c:"Comentarios",l:"¿Algo más que quieras contarme?",h:"Opcional",ty:"textarea"}]},
  {t:"Resumen",final:true}
 ];
+for(const st of STEPS)for(const q of st.f||[])if(q.g)q.o=q.g.flatMap(x=>x[1]);
 const shown=q=>{if(!q.if)return true;const v=A[q.if[0]];if(q.if[1]===">0")return +v>0;return Array.isArray(v)?v.some(x=>q.if[1].includes(x)):q.if[1].includes(v)};
 function updIf(){for(const el of f.querySelectorAll("[data-if]")){const q=STEPS[cur].f.find(x=>x.id===el.dataset.if);el.hidden=!shown(q)}}
 
@@ -193,10 +225,14 @@ function field0(q){
   const v=A[q.id],h=q.hint||q.h?`<span class="hint">${esc(q.h)}</span>`:"";
   if(q.ty==="chips"||q.ty==="radio"){
     const typ=q.ty==="chips"?"checkbox":"radio";
+    const chip=o=>{const on=typ==="checkbox"?(v||[]).includes(o):v===o;return `<label class="chip"><input type="${typ}" name="${q.id}" value="${esc(o)}"${on?" checked":""}>${esc(o)}</label>`};
+    if(q.g)return `<fieldset class="q" style="border:0;padding:0"><legend class="lab" style="padding:0;font-weight:600;margin-bottom:8px">${esc(q.l)}${h}</legend>${q.g.map(([t,os])=>`<div class="cgrp">${esc(t)}</div><div class="chips">${os.map(chip).join("")}</div>`).join("")}</fieldset>`;
     return `<fieldset class="q" style="border:0;padding:0"><legend class="lab" style="padding:0;font-weight:600;margin-bottom:8px">${esc(q.l)}${h}</legend><div class="chips">${q.o.map(o=>{
       const on=typ==="checkbox"?(v||[]).includes(o):v===o;
       return `<label class="chip"><input type="${typ}" name="${q.id}" value="${esc(o)}"${on?" checked":""}>${esc(o)}</label>`}).join("")}</div></fieldset>`;
   }
+  if(q.ty==="style"){
+    return `<fieldset class="q" style="border:0;padding:0"><legend class="lab" style="padding:0;font-weight:600;margin-bottom:8px">${esc(q.l)}${h}</legend><div class="styles">${q.o.map(o=>`<label class="sty${o.surprise?" surp":""}"><input type="radio" name="${q.id}" value="${esc(o.v)}"${v===o.v?" checked":""}><span class="mock" style="background:${o.bg}">${o.surprise?`<span class="q-mark" aria-hidden="true">?</span>`:`<span class="mbar" style="background:${o.c[0]}"></span><span class="mline" style="background:${o.c[2]}"></span><span class="mline short" style="background:${o.c[2]}"></span><span class="mpill" style="background:${o.c[1]}"></span>`}<span class="dots">${o.c.map(c=>`<i style="background:${c}"></i>`).join("")}</span></span><span class="sname">${esc(o.v)}</span><span class="sdesc">${esc(o.d)}</span></label>`).join("")}</div></fieldset>`}
   if(q.ty==="count"){const n=v===undefined||v===""?(q.def||0):+v;
     return `<div class="q cnt"><span class="lab" id="${q.id}-l">${esc(q.l)}</span><div class="step3" role="group" aria-labelledby="${q.id}-l"><button type="button" data-cnt="${q.id}" data-d="-1" aria-label="Quitar uno"${n<=(q.min||0)?" disabled":""}>−</button><output id="${q.id}" data-min="${q.min||0}">${n}</output><button type="button" data-cnt="${q.id}" data-d="1" aria-label="Añadir uno">+</button></div></div>`}
   if(q.ty==="place"&&q.multi){const tags=String(v||"").split(",").map(x=>x.trim()).filter(Boolean);
@@ -256,7 +292,7 @@ async function sendNow(){
   pb.disabled=true;pb.textContent="Enviando…";ok.style.color="";ok.textContent="";fb.hidden=true;
   let t0=0;try{t0=+localStorage.getItem(KEY+"-t0")||0}catch(e){}
   let id="";try{id=localStorage.getItem(KEY+"-id")||"";if(!id){id=Date.now().toString(36)+Math.random().toString(36).slice(2,8);localStorage.setItem(KEY+"-id",id)}}catch(e){id="x"+Date.now().toString(36)}
-  const body=JSON.stringify({...A,_hp:document.getElementById("web").value,_secs:t0?Math.round((Date.now()-t0)/1000):0,_id:id});
+  const body=JSON.stringify({...A,_hp:document.getElementById("web").value,_secs:t0?Math.round((Date.now()-t0)/1000):0,_id:id,_cols:STEPS.flatMap(st=>(st.f||[]).map(q=>[q.id,q.c||q.l]))});
   try{
     if(!CONFIG.endpoint)throw new Error("sin conexión configurada");
     const r=await fetch(CONFIG.endpoint,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body});
@@ -268,13 +304,14 @@ async function sendNow(){
     if(j.error==="espera"){pb.textContent="Enviar los cambios";ok.style.color="var(--red)";ok.textContent="Acabo de recibir un envío tuyo. Espera un minuto antes de enviar otra vez.";setTimeout(()=>pb.disabled=false,60000);return}
     throw new Error(j.error||"error");
   }catch(e){
-    pb.disabled=false;pb.textContent="Intentar de nuevo";ok.style.color="var(--red)";ok.textContent="No se pudo enviar. Revisa tu conexión e inténtalo otra vez.";fb.hidden=false}
+    const msg={rapido:"Lo has completado muy rápido. Espera unos segundos y vuelve a pulsar.",faltan:"Falta tu nombre. Vuelve al primer paso y escríbelo.",tope:"Ahora mismo no se pueden recibir más respuestas. Inténtalo más tarde o envíamelas por WhatsApp."}[e.message];
+    pb.disabled=false;pb.textContent="Intentar de nuevo";ok.style.color="var(--red)";ok.textContent=msg||"No se pudo enviar. Revisa tu conexión e inténtalo otra vez.";fb.hidden=!!msg&&e.message==="rapido"}
 }
 function collect(){
   const s=STEPS[cur];if(!s.f)return;
   for(const q of s.f){
     if(q.ty==="chips")A[q.id]=[...f.querySelectorAll(`input[name="${q.id}"]:checked`)].map(i=>i.value);
-    else if(q.ty==="radio"){const r=f.querySelector(`input[name="${q.id}"]:checked`);A[q.id]=r?r.value:""}
+    else if(q.ty==="radio"||q.ty==="style"){const r=f.querySelector(`input[name="${q.id}"]:checked`);A[q.id]=r?r.value:""}
     else if(q.ty==="place"&&q.multi){const e=document.getElementById(q.id);if(e){const extra=e.value.trim().replace(/,+$/,"");A[q.id]=[...tagsOf(e),...(extra?[extra]:[])].join(", ")}}
     else if(q.ty==="count"){const o=document.getElementById(q.id);if(o)A[q.id]=+o.textContent}
     else{const e=document.getElementById(q.id);if(e)A[q.id]=e.value.trim().replace(/,\s*$/,"")}
