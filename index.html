@@ -36,6 +36,13 @@ input[type=text],input[type=email],input[type=date],input[type=number],textarea,
 textarea{min-height:96px;resize:vertical}
 input:focus,textarea:focus,select:focus,.chip:focus-within,button:focus-visible{outline:3px solid color-mix(in srgb,var(--blue) 45%,transparent);outline-offset:2px;border-color:var(--blue)}
 .ac{position:relative}
+.tagbox{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:48px;padding:6px 8px;background:var(--card);border:1.5px solid var(--line);border-radius:12px;cursor:text}
+.tagbox:focus-within{outline:3px solid color-mix(in srgb,var(--blue) 45%,transparent);outline-offset:2px;border-color:var(--blue)}
+.tagbox input[type=text]{flex:1 1 9em;width:auto;border:0;outline:0;padding:6px;min-height:34px;background:none}
+.tagbox input:focus{outline:0}
+.tag{display:inline-flex;align-items:center;gap:2px;padding:4px 4px 4px 12px;border-radius:999px;background:var(--blue2);color:var(--ink);font-size:15px;line-height:1.3}
+.tagx{min-height:28px;width:28px;padding:0;border:0;border-radius:50%;background:none;color:var(--soft);font-size:18px;line-height:1}
+.tagx:hover{background:color-mix(in srgb,var(--blue) 15%,transparent)}
 .sug{position:absolute;left:0;right:0;top:100%;margin-top:4px;background:var(--card);border:1.5px solid var(--line);border-radius:12px;box-shadow:0 10px 24px rgba(20,33,61,.14);z-index:5;overflow:hidden}
 .sug button{display:flex;justify-content:space-between;gap:12px;width:100%;min-height:46px;padding:10px 14px;border:0;border-radius:0;background:none;font:500 16px Inter,system-ui,sans-serif;text-align:left;color:var(--ink)}
 .sug button+button{border-top:1px solid var(--line)}
@@ -173,6 +180,11 @@ const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(A));localStorage.set
 function field(q){
   const h0=field0(q);return q.if?`<div data-if="${q.id}"${shown(q)?"":" hidden"}>${h0}</div>`:h0;
 }
+function tagHTML(t){return `<span class="tag" data-v="${esc(t)}">${esc(t)}<button type="button" class="tagx" aria-label="Quitar ${esc(t)}">×</button></span>`}
+function addTag(inp,val){val=val.trim().replace(/,+$/,"");if(!val)return;const box=inp.parentNode;
+  if([...box.querySelectorAll(".tag")].some(t=>t.dataset.v.toLowerCase()===val.toLowerCase()))return;
+  inp.insertAdjacentHTML("beforebegin",tagHTML(val));inp.placeholder="Añadir otro…"}
+function tagsOf(inp){return [...inp.parentNode.querySelectorAll(".tag")].map(t=>t.dataset.v)}
 function field0(q){
   const v=A[q.id],h=q.hint||q.h?`<span class="hint">${esc(q.h)}</span>`:"";
   if(q.ty==="chips"||q.ty==="radio"){
@@ -183,6 +195,8 @@ function field0(q){
   }
   if(q.ty==="count"){const n=v===undefined||v===""?(q.def||0):+v;
     return `<div class="q cnt"><span class="lab" id="${q.id}-l">${esc(q.l)}</span><div class="step3" role="group" aria-labelledby="${q.id}-l"><button type="button" data-cnt="${q.id}" data-d="-1" aria-label="Quitar uno"${n<=(q.min||0)?" disabled":""}>−</button><output id="${q.id}" data-min="${q.min||0}">${n}</output><button type="button" data-cnt="${q.id}" data-d="1" aria-label="Añadir uno">+</button></div></div>`}
+  if(q.ty==="place"&&q.multi){const tags=String(v||"").split(",").map(x=>x.trim()).filter(Boolean);
+    return `<div class="q ac"><label for="${q.id}">${esc(q.l)}${h}</label><div class="tagbox">${tags.map(tagHTML).join("")}<input id="${q.id}" name="${q.id}" type="text" value="" autocomplete="off" data-mode="${q.mode||"world"}" data-multi role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="${q.id}-sug" placeholder="${tags.length?"Añadir otro…":"Escribe aquí…"}"></div><div class="sug" id="${q.id}-sug" role="listbox" hidden></div></div>`}
   if(q.ty==="place")return `<div class="q ac"><label for="${q.id}">${esc(q.l)}${h}</label><input id="${q.id}" name="${q.id}" type="text" value="${esc(v)}" autocomplete="off" data-mode="${q.mode||"world"}"${q.multi?" data-multi":""} role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="${q.id}-sug"><div class="sug" id="${q.id}-sug" role="listbox" hidden></div></div>`;
   const inp=q.ty==="textarea"?`<textarea id="${q.id}" name="${q.id}">${esc(v)}</textarea>`
     :`<input id="${q.id}" name="${q.id}" type="${q.ty}" value="${esc(v)}"${q.ty==="number"?' min="1" inputmode="numeric"':""}${q.minFrom&&A[q.minFrom]?` min="${esc(A[q.minFrom])}"`:""}${q.ty==="text"?' autocomplete="off"':""}>`;
@@ -257,6 +271,7 @@ function collect(){
   for(const q of s.f){
     if(q.ty==="chips")A[q.id]=[...f.querySelectorAll(`input[name="${q.id}"]:checked`)].map(i=>i.value);
     else if(q.ty==="radio"){const r=f.querySelector(`input[name="${q.id}"]:checked`);A[q.id]=r?r.value:""}
+    else if(q.ty==="place"&&q.multi){const e=document.getElementById(q.id);if(e){const extra=e.value.trim().replace(/,+$/,"");A[q.id]=[...tagsOf(e),...(extra?[extra]:[])].join(", ")}}
     else if(q.ty==="count"){const o=document.getElementById(q.id);if(o)A[q.id]=+o.textContent}
     else{const e=document.getElementById(q.id);if(e)A[q.id]=e.value.trim().replace(/,\s*$/,"")}
   }
@@ -305,7 +320,7 @@ async function remoteMatches(q){
 }
 function suggest(inp){
   const multi=inp.hasAttribute("data-multi"),country=inp.dataset.mode==="country";
-  const parts=multi?inp.value.split(","):[inp.value],raw=parts[parts.length-1].trim(),qv=norm(raw);
+  const raw=inp.value.trim(),qv=norm(raw);
   clearTimeout(remoteT);const seq=++remoteSeq;
   if(qv.length<2){renderSug(inp,[]);return}
   const loc=localMatches(qv,country?CN:PN);renderSug(inp,loc);
@@ -317,16 +332,25 @@ function suggest(inp){
   },350);
 }
 function pick(inp,val){
-  if(inp.hasAttribute("data-multi")){const parts=inp.value.split(",");parts[parts.length-1]=" "+val;inp.value=parts.join(",").replace(/^\s+/,"")+", "}else inp.value=val;
+  if(inp.hasAttribute("data-multi")){addTag(inp,val);inp.value=""}else inp.value=val;
   const box=document.getElementById(inp.id+"-sug");box.hidden=true;inp.setAttribute("aria-expanded","false");inp.focus();collect()}
-f.addEventListener("input",e=>{if(e.target.getAttribute("role")==="combobox")suggest(e.target)});
+f.addEventListener("input",e=>{const t=e.target;if(t.getAttribute("role")!=="combobox")return;
+  if(t.hasAttribute("data-multi")&&t.value.includes(",")){const parts=t.value.split(",");t.value=parts.pop();parts.forEach(p=>addTag(t,p));collect()}
+  suggest(t)});
+f.addEventListener("click",e=>{const x=e.target.closest(".tagx");if(x){const inp=x.closest(".tagbox").querySelector("input");x.parentNode.remove();if(!tagsOf(inp).length)inp.placeholder="Escribe aquí…";collect();inp.focus();return}
+  const tb=e.target.closest(".tagbox");if(tb&&e.target===tb)tb.querySelector("input").focus()});
 f.addEventListener("pointerdown",e=>{const b=e.target.closest(".sug button");if(b){e.preventDefault();pick(b.closest(".ac").querySelector("input"),b.dataset.v)}});
-f.addEventListener("keydown",e=>{const t=e.target;if(t.getAttribute("role")!=="combobox")return;const box=document.getElementById(t.id+"-sug");if(box.hidden)return;
+f.addEventListener("keydown",e=>{const t=e.target;if(t.getAttribute("role")!=="combobox")return;const box=document.getElementById(t.id+"-sug");
+  if(t.hasAttribute("data-multi")){
+    if(e.key==="Backspace"&&!t.value){const last=[...t.parentNode.querySelectorAll(".tag")].pop();if(last){last.remove();collect()}return}
+    if(e.key==="Enter"&&box.hidden){e.preventDefault();if(t.value.trim()){addTag(t,t.value);t.value="";collect()}return}}
+  if(box.hidden)return;
   const bs=[...box.querySelectorAll("button")];let i=bs.findIndex(b=>b.classList.contains("on"));
   if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();bs[i]?.classList.remove("on");i=(i+(e.key==="ArrowDown"?1:-1)+bs.length)%bs.length;bs[i].classList.add("on")}
   else if(e.key==="Enter"){e.preventDefault();if(bs[i])pick(t,bs[i].dataset.v)}
   else if(e.key==="Escape"){box.hidden=true}});
-f.addEventListener("focusout",e=>{if(e.target.getAttribute("role")==="combobox")setTimeout(()=>{const b=document.getElementById(e.target.id+"-sug");if(b)b.hidden=true},150)});
+f.addEventListener("focusout",e=>{const t=e.target;if(t.getAttribute("role")!=="combobox")return;setTimeout(()=>{const b=document.getElementById(t.id+"-sug");if(b)b.hidden=true;
+  if(t.hasAttribute("data-multi")&&document.activeElement!==t&&t.value.trim()){addTag(t,t.value);t.value="";collect()}},200)});
 f.addEventListener("click",e=>{const c=e.target.closest("[data-cnt]");if(!c)return;
   const o=document.getElementById(c.dataset.cnt),mn=+o.dataset.min,n=Math.max(mn,Math.min(20,+o.textContent+ +c.dataset.d));o.textContent=n;
   c.parentNode.querySelector('[data-d="-1"]').disabled=n<=mn;collect()});
