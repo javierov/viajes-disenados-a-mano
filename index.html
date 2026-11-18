@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tu viaje, diseñado a mano</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* VOICE: warm, personal, unhurried — a friend asking good questions before planning your trip
    IDEA: a travel journal's first page crossed with a boarding pass — one question card at a time
    PICTURE: the form itself, topped by Javier's illustrated banner; his train glides in on load and a pass-style progress strip
-   COLOUR and TYPE: white ground, cobalt tile blue lead, tomato-red accent; DM Serif Display titles, Inter body
+   COLOUR and TYPE: white ground, cobalt tile blue lead, tomato-red accent; Fraunces titles, Inter body
    LAYOUT: one calm column, max 640px; sticky Back/Next bar on phones */
 :root{color-scheme:light dark;
 --bg:light-dark(#ffffff,#0c1730);--ink:light-dark(#14213d,#eef2fb);--soft:light-dark(#5a6684,#a9b4cf);
@@ -27,8 +27,8 @@ body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-
 @keyframes llega{from{transform:translateX(-110%)}to{transform:none}}
 @media (prefers-reduced-motion:reduce){.tiles.go .tren{animation:none;transform:none}}
 main{max-width:640px;margin:0 auto;padding:28px max(5vw,16px) 120px}
-h1{font:400 clamp(34px,7.4vw,48px)/1.05 "DM Serif Display",Georgia,serif;margin:0 0 12px;text-wrap:balance}
-h2{font:400 clamp(27px,5.8vw,34px)/1.1 "DM Serif Display",Georgia,serif;margin:0 0 6px;text-wrap:balance}
+h1{font:600 clamp(32px,7vw,46px)/1.05 Fraunces,Georgia,serif;margin:0 0 12px;text-wrap:balance}
+h2{font:600 clamp(26px,5.5vw,34px)/1.1 Fraunces,Georgia,serif;margin:0 0 6px;text-wrap:balance}
 .lead{color:var(--soft);margin:0 0 22px}
 .pass{display:flex;align-items:center;gap:12px;border:1.5px dashed var(--line);border-radius:14px;padding:10px 14px;margin-bottom:26px;font-size:14px;color:var(--soft)}
 .pass b{color:var(--ink);font-weight:600;white-space:nowrap}
@@ -263,40 +263,15 @@ function summary(){
 f.addEventListener("submit",e=>e.preventDefault());
 const norm=x=>x.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
 const PN=PLACES.map(p=>[p,norm(p)]);
-const remoteCache={};let remoteT=0,remoteSeq=0;
-function renderSug(inp,list){
-  const box=document.getElementById(inp.id+"-sug");
-  if(!list.length){box.hidden=true;inp.setAttribute("aria-expanded","false");return}
-  box.innerHTML=list.map((o,i)=>`<button type="button" role="option" data-v="${esc(o.v)}"${i?"":' class="on"'}><span>${esc(o.a)}</span>${o.b?`<small>${esc(o.b)}</small>`:""}</button>`).join("");
-  box.hidden=false;inp.setAttribute("aria-expanded","true");
-}
-function localMatches(qv){
+function suggest(inp){
+  const box=document.getElementById(inp.id+"-sug"),parts=inp.value.split(","),qv=norm(parts[parts.length-1]);
+  if(qv.length<2){box.hidden=true;inp.setAttribute("aria-expanded","false");return}
   const starts=[],words=[],inside=[];
   for(const [p,n] of PN){if(n.startsWith(qv))starts.push(p);else if(n.split(/[\s,]+/).some(w=>w.startsWith(qv)))words.push(p);else if(n.includes(qv))inside.push(p)}
-  return [...starts,...words,...inside].slice(0,5).map(p=>{const [a,...b]=p.split(", ");return {a,b:b.join(", "),v:b.length?a+" ("+b.join(", ")+")":a}});
-}
-async function remoteMatches(q){
-  if(remoteCache[q])return remoteCache[q];
-  const r=await fetch("https://photon.komoot.io/api/?limit=8&osm_tag=place&q="+encodeURIComponent(q));
-  const j=await r.json();
-  const out=[],seen=new Set();
-  for(const f of j.features||[]){const p=f.properties||{};if(!p.name)continue;
-    const parts=[p.state,p.country].filter((x,i,arr)=>x&&x!==p.name&&arr.indexOf(x)===i);
-    const key=norm(p.name+"|"+parts.join("|"));if(seen.has(key))continue;seen.add(key);
-    out.push({a:p.name,b:parts.join(", "),v:p.country&&p.country!==p.name?p.name+" ("+p.country+")":p.name})}
-  return remoteCache[q]=out;
-}
-function suggest(inp){
-  const parts=inp.value.split(","),raw=parts[parts.length-1].trim(),qv=norm(raw);
-  clearTimeout(remoteT);const seq=++remoteSeq;
-  if(qv.length<2){renderSug(inp,[]);return}
-  const loc=localMatches(qv);renderSug(inp,loc);
-  if(qv.length<3)return;
-  remoteT=setTimeout(async()=>{
-    try{const rem=await remoteMatches(raw);if(seq!==remoteSeq)return;
-      const have=new Set(loc.map(o=>norm(o.a)));
-      renderSug(inp,[...loc,...rem.filter(o=>!have.has(norm(o.a)))].slice(0,8))}catch(e){}
-  },350);
+  const r=[...starts,...words,...inside].slice(0,6);
+  if(!r.length){box.hidden=true;inp.setAttribute("aria-expanded","false");return}
+  box.innerHTML=r.map((p,i)=>{const [a,...b]=p.split(", ");return `<button type="button" role="option" data-v="${esc(b.length?a+" ("+b.join(", ")+")":a)}"${i?"":' class="on"'}><span>${esc(a)}</span>${b.length?`<small>${esc(b.join(", "))}</small>`:""}</button>`}).join("");
+  box.hidden=false;inp.setAttribute("aria-expanded","true");
 }
 function pick(inp,val){const parts=inp.value.split(",");parts[parts.length-1]=" "+val;inp.value=parts.join(",").replace(/^\s+/,"")+", ";
   const box=document.getElementById(inp.id+"-sug");box.hidden=true;inp.setAttribute("aria-expanded","false");inp.focus();collect()}
