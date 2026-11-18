@@ -25,6 +25,10 @@ main{max-width:640px;margin:0 auto;padding:28px max(5vw,16px) 120px}
 h1{font:400 clamp(34px,7.4vw,48px)/1.05 "DM Serif Display",Georgia,serif;margin:0 0 12px;text-wrap:balance}
 h2{font:400 clamp(27px,5.8vw,34px)/1.1 "DM Serif Display",Georgia,serif;margin:0 0 6px;text-wrap:balance}
 .lead{color:var(--soft);margin:0 0 22px}
+body.is-intro .pass{display:none}
+body.is-intro main{padding-top:14px}
+body.is-intro h1{margin-bottom:8px}
+body.is-intro .lead{margin-bottom:12px}
 .pass{display:flex;align-items:center;gap:12px;border:1.5px dashed var(--line);border-radius:14px;padding:10px 14px;margin-bottom:26px;font-size:14px;color:var(--soft)}
 .pass b{color:var(--ink);font-weight:600;white-space:nowrap}
 .bar{flex:1;height:6px;background:var(--blue2);border-radius:6px;overflow:hidden}
@@ -208,14 +212,14 @@ function render(){
   const p=Math.round(Math.min(cur,n+1)/(n+1)*100);
   document.getElementById("prog").style.width=p+"%";document.getElementById("pct").textContent=p+"%";
   document.getElementById("stepn").textContent=s.intro?"Inicio":s.final?"Terminado":`Paso ${cur} de ${n}`;
+  document.body.classList.toggle("is-intro",!!s.intro);
   bk.hidden=cur===0;nx.hidden=!!s.final;
   nx.textContent=s.intro?"Empezar":editing?"Volver al resumen":cur===n?"Ver resumen":"Siguiente";
   let h="";
   if(s.intro){
     h=`<h1>Tu viaje, diseñado a mano</h1>
     <p class="lead">Una app creada solo para ti. Con tus respuestas diseñaré tu propia app de viaje, con tu itinerario, tus lugares en el mapa, cómo moverte y todo lo práctico, y con detalles pensados para ti. Sirve para cualquier viaje: una ciudad, un tour, una ruta a pie o una aventura.</p>
-    <p>Son ${n} pasos cortos, unos 5 minutos, y casi todo se contesta tocando opciones. Solo es obligatorio tu nombre. Si algo no lo sabes, déjalo en blanco: lo vemos juntos después.</p>
-    <p class="note">Tus respuestas se guardan en este navegador mientras escribes, así que puedes cerrar y seguir después. Solo usaré tus respuestas para preparar tu viaje y no las compartiré con nadie.</p>`;
+    <p>Son ${n} pasos cortos, unos 5 minutos, y casi todo se contesta tocando opciones. Solo es obligatorio tu nombre. Si algo no lo sabes, déjalo en blanco: lo vemos juntos después.</p>`;
   }else if(s.final){
     const txt=summary(),sent=getSent(),same=sent&&sent.hash===JSON.stringify(A);
     const when=sent?new Date(sent.at).toLocaleString("es-ES",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"}):"";
