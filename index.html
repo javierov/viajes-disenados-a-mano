@@ -35,6 +35,9 @@ body.is-intro .lead{margin-bottom:12px}
 .bar i{display:block;height:100%;background:var(--red);width:0;transition:width .35s}
 .q{margin:0 0 24px}
 .q>label,.q>.lab{display:block;font-weight:600;margin-bottom:8px}
+.info{display:inline-grid;place-items:center;width:22px;height:22px;min-height:0;min-width:0;flex:none;align-self:center;box-sizing:border-box;margin-left:8px;border-radius:50%;border:1.5px solid var(--soft);background:none;color:var(--soft);font:600 13px/1 Inter,sans-serif;cursor:pointer;vertical-align:1px;padding:0}
+.info[aria-expanded="true"]{background:#1c3fa0;border-color:#1c3fa0;color:#fff}
+.bub{margin:4px 0 10px;padding:10px 12px;border-radius:10px;background:#eef2fb;color:#1c2a55;font-size:14px;line-height:1.45}
 .hint{display:block;font-weight:400;color:var(--soft);font-size:14px;margin-top:2px}
 input[type=text],input[type=email],input[type=date],input[type=number],textarea,select{width:100%;font:16px Inter,system-ui,sans-serif;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;min-height:48px}
 textarea{min-height:96px;resize:vertical}
@@ -134,6 +137,7 @@ const STEPS=[
  {t:"Hola",intro:true},
  {t:"Sobre ti",d:"Empecemos por lo básico. Si algo no lo sabes, déjalo en blanco.",f:[
   {id:"nombre",c:"Nombre",l:"¿Cómo te llamas?",ty:"text",req:1},
+  {id:"email",c:"Email",l:"Tu email",ty:"email",req:1,info:"Es para enviarte una copia de tus respuestas y, cuando esté lista, tu app hecha a mano con las instrucciones para instalarla en tu móvil. No lo usaré para nada más."},
   {id:"origen",c:"Sale desde",l:"¿Desde qué país o ciudad sales?",h:"Escribe y elige de la lista",ty:"place"},
   {id:"pasaporte",c:"Pasaporte",l:"¿Con qué pasaporte viajas?",h:"Para revisar si necesitas visado. Si tienes dos, pon los dos",ty:"place",mode:"country",multi:1},
   {id:"idiomas",c:"Idiomas",l:"¿Qué idiomas hablas?",ty:"chips",o:["Español","Inglés","Francés","Portugués","Italiano","Alemán","Otro"]},
@@ -184,7 +188,7 @@ const STEPS=[
   {id:"pago",c:"Forma de pago",l:"¿Cómo pagarás normalmente?",ty:"chips",o:["Tarjeta","Efectivo","Móvil (Apple/Google Pay)"]}]},
  {t:"Tu app",d:"Último paso.",f:[
   {id:"nombre_app",c:"Nombre de la app",l:"¿Cómo quieres que se llame tu app?",h:"Opcional. Si no se te ocurre, te propongo uno",ty:"text"},
-  {id:"estilo",c:"Estilo de la app",l:"¿Qué estilo te gusta más?",h:"Toca el que más te guste. Si no lo tienes claro, «Sorpréndeme»",ty:"style",o:[
+  {id:"estilo",c:"Estilo de la app",l:"¿Qué estilo te gusta más?",h:"Podrás cambiarlo cuando quieras en tu app. Si no lo tienes claro, «Sorpréndeme»",ty:"style",o:[
    {v:"Sorpréndeme",d:"Lo elijo yo pensando en ti",bg:"#ffffff",c:["#e5402b","#1c3fa0","#c9952b","#2f9e6a"],surprise:1},
    {v:"Noche elegante",d:"Oscuro, azules y dorado",bg:"#0f1522",c:["#8fa3bf","#c9a44c","#2a3a5c"]},
    {v:"Luminoso",d:"Blanco, azul y toques de color",bg:"#ffffff",c:["#1c3fa0","#e5402b","#cfe0f7"]},
@@ -239,8 +243,9 @@ function field0(q){
     return `<div class="q ac"><label for="${q.id}">${esc(q.l)}${h}</label><div class="tagbox">${tags.map(tagHTML).join("")}<input id="${q.id}" name="${q.id}" type="text" value="" autocomplete="off" data-mode="${q.mode||"world"}" data-multi role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="${q.id}-sug" placeholder="${tags.length?"Añadir otro…":"Escribe aquí…"}"></div><div class="sug" id="${q.id}-sug" role="listbox" hidden></div></div>`}
   if(q.ty==="place")return `<div class="q ac"><label for="${q.id}">${esc(q.l)}${h}</label><input id="${q.id}" name="${q.id}" type="text" value="${esc(v)}" autocomplete="off" data-mode="${q.mode||"world"}"${q.multi?" data-multi":""} role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="${q.id}-sug"><div class="sug" id="${q.id}-sug" role="listbox" hidden></div></div>`;
   const inp=q.ty==="textarea"?`<textarea id="${q.id}" name="${q.id}">${esc(v)}</textarea>`
-    :`<input id="${q.id}" name="${q.id}" type="${q.ty}" value="${esc(v)}"${q.ty==="number"?' min="1" inputmode="numeric"':""}${q.minFrom&&A[q.minFrom]?` min="${esc(A[q.minFrom])}"`:""}${q.ty==="text"?' autocomplete="off"':""}>`;
-  return `<div class="q"><label for="${q.id}">${esc(q.l)}${q.req?" *":""}${h}</label>${inp}</div>`;
+    :`<input id="${q.id}" name="${q.id}" type="${q.ty}" value="${esc(v)}"${q.ty==="number"?' min="1" inputmode="numeric"':""}${q.minFrom&&A[q.minFrom]?` min="${esc(A[q.minFrom])}"`:""}${q.ty==="text"?' autocomplete="off"':""}${q.ty==="email"?' autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="nombre@ejemplo.com"':""}>`;
+  const inf=q.info?`<button type="button" class="info" data-info="${q.id}" aria-expanded="false" aria-label="¿Para qué lo pides?">?</button>`:"";
+  return `<div class="q"><label for="${q.id}">${esc(q.l)}${q.req?" *":""}${inf}${h}</label>${q.info?`<p class="bub" id="${q.id}-info" hidden>${esc(q.info)}</p>`:""}${inp}</div>`;
 }
 
 function render(){
@@ -293,7 +298,7 @@ async function sendNow(){
   let t0=0;try{t0=+localStorage.getItem(KEY+"-t0")||0}catch(e){}
   let id="";try{id=localStorage.getItem(KEY+"-id")||"";if(!id){id=Date.now().toString(36)+Math.random().toString(36).slice(2,8);localStorage.setItem(KEY+"-id",id)}}catch(e){id="x"+Date.now().toString(36)}
   const vis={...A};for(const st of STEPS)for(const q of st.f||[])if(!shown(q))vis[q.id]="";
-  const body=JSON.stringify({...vis,_hp:document.getElementById("web").value,_secs:t0?Math.round((Date.now()-t0)/1000):0,_id:id,_cols:STEPS.flatMap(st=>(st.f||[]).map(q=>[q.id,q.c||q.l]))});
+  const body=JSON.stringify({...vis,_hp:document.getElementById("web").value,_secs:t0?Math.round((Date.now()-t0)/1000):0,_id:id,_cols:STEPS.flatMap(st=>(st.f||[]).map(q=>[q.id,q.c||q.l])),_resumen:STEPS.filter(st=>st.f).map(st=>[st.t,st.f.filter(shown).map(q=>[q.c||q.l,val(q)]).filter(r=>r[1])]).filter(x=>x[1].length)});
   if(/claude\.ai|claudeusercontent|anthropic/.test(location.hostname)){pb.disabled=false;pb.textContent="Enviar mis respuestas";ok.style.color="var(--red)";ok.textContent="Versión de taller: el envío solo funciona desde el enlace de GitHub.";return}
   try{
     if(!CONFIG.endpoint)throw new Error("sin conexión configurada");
@@ -301,12 +306,12 @@ async function sendNow(){
     let j={};try{j=await r.json()}catch(e){j={ok:r.ok}}
     if(j.ok){
       try{localStorage.setItem(KEY+"-sent",JSON.stringify({at:Date.now(),hash:JSON.stringify(A)}))}catch(e){}
-      pb.textContent="Enviado ✓";ok.textContent="¡Recibido! Ya tengo tus respuestas. Te escribiré pronto.";
+      pb.textContent="Enviado ✓";ok.textContent="¡Recibido! Ya tengo tus respuestas."+(A.email?" Te he enviado una copia a "+A.email+" (si no la ves, mira en spam).":" Te escribiré pronto.");
       document.getElementById("flead").textContent="Tus respuestas ya están enviadas. ¡Muchas gracias!";const fh=document.getElementById("fh");fh.textContent=fh.textContent.replace("¡Casi listo","¡Gracias");return}
     if(j.error==="espera"){pb.textContent="Enviar los cambios";ok.style.color="var(--red)";ok.textContent="Acabo de recibir un envío tuyo. Espera un minuto antes de enviar otra vez.";setTimeout(()=>pb.disabled=false,60000);return}
     throw new Error(j.error||"error");
   }catch(e){
-    const msg={rapido:"Lo has completado muy rápido. Espera unos segundos y vuelve a pulsar.",faltan:"Falta tu nombre. Vuelve al primer paso y escríbelo.",tope:"Ahora mismo no se pueden recibir más respuestas. Inténtalo más tarde o envíamelas por WhatsApp."}[e.message];
+    const msg={rapido:"Lo has completado muy rápido. Espera unos segundos y vuelve a pulsar.",faltan:"Falta tu nombre. Vuelve al primer paso y escríbelo.",email:"Revisa tu email en el primer paso, parece que tiene un error.",tope:"Ahora mismo no se pueden recibir más respuestas. Inténtalo más tarde o envíamelas por WhatsApp."}[e.message];
     pb.disabled=false;pb.textContent="Intentar de nuevo";ok.style.color="var(--red)";ok.textContent=msg||"No se pudo enviar. Revisa tu conexión e inténtalo otra vez.";fb.hidden=!!msg&&e.message==="rapido"}
 }
 function collect(){
@@ -405,9 +410,12 @@ f.addEventListener("change",collect);f.addEventListener("input",()=>{clearTimeou
 let editing=false;
 const tiles=document.getElementById("tiles");
 {const tr=tiles.querySelector(".tren"),go=()=>setTimeout(()=>tiles.classList.add("go"),250);tr.complete?go():tr.addEventListener("load",go,{once:true})}
+f.addEventListener("click",e=>{const b=e.target.closest("[data-info]");if(!b)return;e.preventDefault();const p=document.getElementById(b.dataset.info+"-info"),o=p.hidden;p.hidden=!o;b.setAttribute("aria-expanded",String(o))});
+const okMail=x=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(x);
 nx.onclick=()=>{collect();const s=STEPS[cur];
   if(s.intro){try{if(!localStorage.getItem(KEY+"-t0"))localStorage.setItem(KEY+"-t0",Date.now())}catch(e){}}
-  if(s.f){const miss=s.f.find(q=>q.req&&!A[q.id]);if(miss){const e=document.getElementById("err");e.textContent="Rellena «"+miss.l.replace(/^¿|\?$/g,"")+"» para continuar.";document.getElementById(miss.id)?.focus();return}}
+  if(s.f){const miss=s.f.find(q=>q.req&&!A[q.id]);if(miss){const e=document.getElementById("err");e.textContent="Rellena «"+miss.l.replace(/^¿|\?$/g,"")+"» para continuar.";document.getElementById(miss.id)?.focus();return}
+    const bad=s.f.find(q=>q.ty==="email"&&A[q.id]&&!okMail(A[q.id]));if(bad){document.getElementById("err").textContent="Revisa tu email, parece que le falta algo.";document.getElementById(bad.id)?.focus();return}}
   if(editing){editing=false;cur=STEPS.length-1;save();render();return}
   if(cur<STEPS.length-1){cur++;save();render()}};
 bk.onclick=()=>{collect();editing=false;if(cur>0){cur--;save();render()}};
