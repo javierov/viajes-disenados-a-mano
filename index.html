@@ -292,7 +292,9 @@ async function sendNow(){
   pb.disabled=true;pb.textContent="Enviando…";ok.style.color="";ok.textContent="";fb.hidden=true;
   let t0=0;try{t0=+localStorage.getItem(KEY+"-t0")||0}catch(e){}
   let id="";try{id=localStorage.getItem(KEY+"-id")||"";if(!id){id=Date.now().toString(36)+Math.random().toString(36).slice(2,8);localStorage.setItem(KEY+"-id",id)}}catch(e){id="x"+Date.now().toString(36)}
-  const body=JSON.stringify({...A,_hp:document.getElementById("web").value,_secs:t0?Math.round((Date.now()-t0)/1000):0,_id:id,_cols:STEPS.flatMap(st=>(st.f||[]).map(q=>[q.id,q.c||q.l]))});
+  const vis={...A};for(const st of STEPS)for(const q of st.f||[])if(!shown(q))vis[q.id]="";
+  const body=JSON.stringify({...vis,_hp:document.getElementById("web").value,_secs:t0?Math.round((Date.now()-t0)/1000):0,_id:id,_cols:STEPS.flatMap(st=>(st.f||[]).map(q=>[q.id,q.c||q.l]))});
+  if(/claude\.ai|claudeusercontent|anthropic/.test(location.hostname)){pb.disabled=false;pb.textContent="Enviar mis respuestas";ok.style.color="var(--red)";ok.textContent="Versión de taller: el envío solo funciona desde el enlace de GitHub.";return}
   try{
     if(!CONFIG.endpoint)throw new Error("sin conexión configurada");
     const r=await fetch(CONFIG.endpoint,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body});
