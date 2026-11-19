@@ -396,7 +396,7 @@ async function sendNow(){
   const out={...A};delete out._ruta;out.ruta=rutaTexto();for(const st of STEPS)for(const q of st.f||[])if(!shown(q))out[q.id]="";
   if(isMulti()){const ds=destList(),m=(A.ya_estuvo_m||[]).filter(x=>ds.includes(x)||x==="En ninguna");out.ya_estuvo=m.join(", ");out.ya_vio=out.ya_vio_m||""}delete out.ya_estuvo_m;delete out.ya_vio_m;
   const body=JSON.stringify({...out,_hp:document.getElementById("web").value,_secs:t0?Math.round((Date.now()-t0)/1000):0,_id:id,_cols:STEPS.flatMap(st=>(st.f||[]).filter(q=>!/_m$/.test(q.id)).map(q=>[q.id,q.c||q.l])),_resumen:STEPS.filter((st,i)=>st.f&&vis(i)).map(st=>[st.t,st.f.filter(shown).map(q=>[q.c||q.l,val(q)]).filter(r=>r[1])]).filter(x=>x[1].length)});
-  if(/claude\.ai|claudeusercontent|anthropic/.test(location.hostname)){pb.disabled=false;pb.textContent="Enviar mis respuestas";ok.style.color="var(--red)";ok.textContent="Versión de taller: el envío solo funciona desde el enlace de GitHub.";return}
+  if(!/(^|\.)github\.io$/.test(location.hostname)){pb.disabled=false;pb.textContent="Enviar mis respuestas";ok.style.color="var(--red)";ok.textContent="Versión de taller: el envío solo funciona desde el enlace de GitHub.";return}
   try{
     if(!CONFIG.endpoint)throw new Error("sin conexión configurada");
     const r=await fetch(CONFIG.endpoint,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body});
