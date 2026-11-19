@@ -39,7 +39,7 @@ body.is-intro .lead{margin-bottom:12px}
 .info[aria-expanded="true"]{background:#1c3fa0;border-color:#1c3fa0;color:#fff}
 .bub{margin:4px 0 10px;padding:10px 12px;border-radius:10px;background:#eef2fb;color:#1c2a55;font-size:14px;line-height:1.45}
 .hint{display:block;font-weight:400;color:var(--soft);font-size:14px;margin-top:2px}
-input[type=text],input[type=email],input[type=date],input[type=number],textarea,select{width:100%;font:16px Inter,system-ui,sans-serif;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;min-height:48px}
+input[type=text],input[type=email],input[type=date],input[type=time],input[type=number],textarea,select{width:100%;font:16px Inter,system-ui,sans-serif;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;min-height:48px}
 textarea{min-height:96px;resize:vertical}
 input:focus,textarea:focus,select:focus,.chip:focus-within,button:focus-visible{outline:3px solid color-mix(in srgb,var(--blue) 45%,transparent);outline-offset:2px;border-color:var(--blue)}
 .ac{position:relative}
@@ -88,8 +88,26 @@ input:focus,textarea:focus,select:focus,.chip:focus-within,button:focus-visible{
 .sech h3{margin:0;font:400 20px/1.2 "DM Serif Display",Georgia,serif}
 .edit{min-height:40px;padding:0 14px;font-size:15px;color:var(--blue);border-color:var(--line)}
 .sec dl{margin:8px 0 0;display:grid;grid-template-columns:minmax(0,10em) minmax(0,1fr);gap:4px 12px;font-size:15px}
-.sec dt{color:var(--soft)}.sec dd{margin:0}
+.sec dt{color:var(--soft)}.sec dd{margin:0;white-space:pre-line}
 @media(max-width:600px){.sec dl{grid-template-columns:minmax(0,1fr)}.sec dd{margin-bottom:6px}}
+.rt-help{margin:0 0 14px}
+.rt-tot{font-size:14px;color:var(--soft);margin:-4px 0 12px}
+.rt-tot b{color:var(--ink)}.rt-tot.warn b{color:var(--red)}
+.rt{list-style:none;margin:0 0 22px;padding:0;display:grid;gap:10px}
+.rc{border:1.5px solid var(--line);border-radius:14px;padding:12px 12px 14px;background:var(--card)}
+.rc-h{display:flex;align-items:center;gap:10px}
+.rc-n{flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-weight:600;font-size:14px}
+.rc-c{flex:1;min-width:0;font-weight:600;line-height:1.3}
+.rc-mv{display:flex;gap:6px}
+.rc-mv button{width:40px;min-height:40px;padding:0;border-radius:10px;font-size:18px}
+.rc-mv button:disabled{opacity:.3;cursor:default}
+.rc-r{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:10px}
+.rc-l{font-size:14px;color:var(--soft)}
+.rc-d{font-size:13px;color:var(--soft);margin-top:2px}
+.rc .step3 button{width:40px;min-height:40px;font-size:20px}
+.rc .step3 output{min-width:64px;font-size:15px}
+.rc .chips{gap:6px}.rc .chip{min-height:38px;padding:6px 12px;font-size:14px}
+.rc input[type=text]{margin-top:8px;padding:10px 12px}
 .row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{position:relative;display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;border:1.5px solid var(--line);border-radius:999px;cursor:pointer;background:var(--card);font-size:15px;user-select:none}
@@ -139,7 +157,7 @@ const STEPS=[
   {id:"nombre",c:"Nombre",l:"¿Cómo te llamas?",ty:"text",req:1},
   {id:"email",c:"Email",l:"Tu email",ty:"email",req:1,info:"Es para enviarte una copia de tus respuestas y, cuando esté lista, tu app hecha a mano con las instrucciones para instalarla en tu móvil. No lo usaré para nada más."},
   {id:"origen",c:"Sale desde",l:"¿Desde qué país o ciudad sales?",h:"Escribe y elige de la lista",ty:"place"},
-  {id:"pasaporte",c:"Pasaporte",l:"¿Con qué pasaporte viajas?",h:"Para revisar si necesitas visado. Si tienes dos, pon los dos",ty:"place",mode:"country",multi:1},
+  {id:"pasaporte",c:"Pasaporte",l:"¿De qué país es tu pasaporte?",h:"Solo el país, no el número del documento. Es para revisar si necesitas visado. Si tienes dos, pon los dos",ty:"place",mode:"country",multi:1},
   {id:"idiomas",c:"Idiomas",l:"¿Qué idiomas hablas?",ty:"chips",o:["Español","Inglés","Francés","Portugués","Italiano","Alemán","Otro"]},
   {id:"idiomas_otro",c:"Otro idioma",l:"¿Qué otro idioma?",ty:"text",if:["idiomas",["Otro"]]},
   {id:"grupo",c:"Viaja con",l:"¿Con quién viajas?",ty:"radio",o:["Sola / solo","En pareja","Con amigos","En familia con niños","Con personas mayores","En grupo organizado","En un tour de estudios"]},
@@ -157,20 +175,23 @@ const STEPS=[
   {id:"ya_vio",c:"Lo que ya vio",l:"¿Qué viste esa vez?",h:"Así no te propongo lo mismo",ty:"text",if:["ya_estuvo",["Sí"]]}]},
  {t:"Fechas",d:"Aunque sean aproximadas, me ayudan mucho.",f:[
   {id:"llegada",c:"Inicio",l:"Día de inicio",ty:"date",half:1},{id:"salida",c:"Regreso",l:"Día de regreso",ty:"date",half:1,minFrom:"llegada"},
-  {id:"hora_llegada",c:"Llega por la",l:"¿A qué hora llegas?",ty:"radio",o:["Mañana","Mediodía","Tarde","Noche","No lo sé"]},
-  {id:"hora_salida",c:"Se va por la",l:"¿A qué hora te vas?",ty:"radio",o:["Mañana","Mediodía","Tarde","Noche","No lo sé"]},
-  {id:"llega_por",c:"Empieza en",l:"¿Dónde empieza tu viaje?",h:"Ciudad o aeropuerto de llegada",ty:"place"},
-  {id:"sale_por",c:"Termina en",l:"¿Dónde termina?",ty:"place"},
+  {id:"llega_por",c:"Empieza en",l:"¿Por qué aeropuerto o ciudad llegas?",h:"El aeropuerto, la estación o la ciudad donde empieza tu viaje",ty:"place"},
+  {id:"hora_llegada",c:"Hora de llegada",l:"Hora aproximada de llegada",ty:"time",half:1},{id:"vuelo_llegada",c:"Vuelo de llegada",l:"Nº de vuelo o tren",h:"Si lo tienes",ty:"text",half:1},
+  {id:"sale_por",c:"Termina en",l:"¿Por qué aeropuerto o ciudad te vas?",ty:"place"},
+  {id:"hora_salida",c:"Hora de salida",l:"Hora aproximada de salida",ty:"time",half:1},{id:"vuelo_salida",c:"Vuelo de salida",l:"Nº de vuelo o tren",h:"Si lo tienes",ty:"text",half:1},
   {id:"flex",c:"Fechas fijas",l:"¿Las fechas son fijas?",ty:"radio",o:["Sí, ya tengo vuelos","Más o menos","Todavía no lo sé"]}]},
- {t:"Lugares y cómo te mueves",d:"Los días en cada sitio los propongo yo a partir de tus fechas.",f:[
+ {t:"Tu ruta",multi:true,d:"Pon las ciudades en el orden en que las visitas y dime cuántas noches duermes en cada una.",f:[
+  {id:"ruta",c:"Ruta",ty:"route"},
+  {id:"entre",c:"Entre ciudades",l:"¿Cómo vas de una ciudad a otra?",h:"Puedes marcar varias",ty:"chips",none:"Recomiéndame",o:["Tren","Avión","Bus","Coche","Recomiéndame"]}]},
+ {t:"Lugares y cómo te mueves",d:"Cuéntame qué no te quieres perder y cómo prefieres moverte.",f:[
   {id:"lugares",c:"Lugares y experiencias",l:"¿Algo que no te quieras perder?",h:"Opcional. Un lugar, una atracción, una experiencia…",ty:"textarea"},
   {id:"transporte",c:"Transporte",l:"¿Cómo prefieres moverte?",ty:"chips",o:["Tren","Autobús","Coche de alquiler","Vuelos internos","Barco o ferri","Metro y bus urbano","Taxi / Uber","Transporte del tour","Andando","Bicicleta"]},
   {id:"carnet",c:"Puede conducir",l:"¿Puedes conducir en el destino?",ty:"radio",o:["Sí","No","No lo sé"],if:["transporte",["Coche de alquiler"]]},
   {id:"caminar",c:"Caminar",l:"¿Cuánto te gusta caminar?",ty:"radio",o:["Poco","Lo normal","Mucho"]},
   {id:"movilidad",c:"Movilidad",l:"¿Alguna necesidad de movilidad?",ty:"chips",none:"Ninguna",o:["Ninguna","Camino poco","Evito escaleras","Silla de ruedas","Carrito de bebé"]}]},
  {t:"Dónde duermes",d:"Si aún no tienes nada, perfecto: te propongo opciones.",f:[
-  {id:"aloj_estado",c:"Alojamiento reservado",l:"¿Ya tienes alojamiento?",ty:"radio",o:["Sí, todo reservado","Una parte","Nada todavía","Lo incluye el tour"]},
-  {id:"aloj_donde",c:"Dónde se aloja",l:"¿Dónde te alojas?",h:"Nombre del hotel o dirección, para ponerlo en el mapa",ty:"textarea",if:["aloj_estado",["Sí, todo reservado","Una parte"]]},
+  {id:"aloj_estado",single:1,c:"Alojamiento reservado",l:"¿Ya tienes alojamiento?",ty:"radio",o:["Sí, todo reservado","Una parte","Nada todavía","Lo incluye el tour"]},
+  {id:"aloj_donde",single:1,c:"Dónde se aloja",l:"¿Dónde te alojas?",h:"Nombre del hotel o dirección, para ponerlo en el mapa",ty:"textarea",if:["aloj_estado",["Sí, todo reservado","Una parte"]]},
   {id:"aloj_tipo",c:"Tipo de alojamiento",l:"¿Qué tipo prefieres?",ty:"chips",o:["Hotel","Apartamento","Hostal","Albergue","Casa rural","Resort","Camping","Casa de amigos"]},
   {id:"aloj_precio",c:"Precio por noche",l:"Presupuesto por noche",ty:"radio",o:["Menos de 60 €","60–120 €","120–200 €","Más de 200 €"]}]},
  {t:"Lo que te gusta",d:"Toca todo lo que te apetezca. Así la app te propone cosas a tu medida.",f:[
@@ -207,7 +228,11 @@ const STEPS=[
  {t:"Resumen",final:true}
 ];
 for(const st of STEPS)for(const q of st.f||[])if(q.g)q.o=q.g.flatMap(x=>x[1]);
-const shown=q=>{if(!q.if)return true;const v=A[q.if[0]];if(q.if[1]===">0")return +v>0;return Array.isArray(v)?v.some(x=>q.if[1].includes(x)):q.if[1].includes(v)};
+const destList=()=>String(A.destino||"").split(",").map(x=>x.trim()).filter(Boolean);
+const isMulti=()=>destList().length>1;
+for(const st of STEPS)for(const q of st.f||[])if(st.multi)q.multiOnly=1;
+const vis=i=>!STEPS[i].multi||isMulti();
+const shown=q=>{if(q.single&&isMulti())return false;if(q.multiOnly&&!isMulti())return false;if(!q.if)return true;const v=A[q.if[0]];if(q.if[1]===">0")return +v>0;return Array.isArray(v)?v.some(x=>q.if[1].includes(x)):q.if[1].includes(v)};
 function updIf(){for(const el of f.querySelectorAll("[data-if]")){const q=STEPS[cur].f.find(x=>x.id===el.dataset.if);el.hidden=!shown(q)}}
 
 const KEY="cuestionario-viaje-v2";let A={};try{A=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}
@@ -217,7 +242,39 @@ const f=document.getElementById("f"),nx=document.getElementById("next"),bk=docum
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(A));localStorage.setItem(KEY+"-p",cur)}catch(e){}};
 
+/* Tu ruta: orden, noches y alojamiento por ciudad */
+function rutaD(){
+  const d=A._ruta&&typeof A._ruta==="object"?A._ruta:{};d.o=Array.isArray(d.o)?d.o:[];d.n=d.n||{};d.r=d.r||{};d.d=d.d||{};
+  const ds=destList();d.o=d.o.filter(c=>ds.includes(c)).concat(ds.filter(c=>!d.o.includes(c)));A._ruta=d;return d}
+const fmtD=t=>new Date(t).toLocaleDateString("es-ES",{day:"numeric",month:"short",timeZone:"UTC"}).replace(".","");
+function rutaFechas(d){
+  if(!A.llegada||d.ayuda)return {};const out={};let t=Date.parse(A.llegada+"T00:00:00Z");if(isNaN(t))return {};
+  for(const c of d.o){const n=d.n[c];if(n===undefined||n===null)break;out[c]=n===0?fmtD(t):fmtD(t)+" – "+fmtD(t+n*864e5);t+=n*864e5}return out}
+function rutaNoches(){if(!A.llegada||!A.salida)return null;const n=Math.round((Date.parse(A.salida)-Date.parse(A.llegada))/864e5);return n>0?n:null}
+function rutaTexto(){
+  if(!isMulti())return "";const d=rutaD(),fe=rutaFechas(d);
+  const ls=d.o.map((c,i)=>{const n=d.n[c];let t=(i+1)+". "+c;
+    if(!d.ayuda&&n!==undefined&&n!==null)t+=" · "+(n===0?"de paso, sin dormir":n+(n===1?" noche":" noches"));
+    if(fe[c])t+=" ("+fe[c]+")";
+    if(d.r[c]==="Reservado")t+=" · alojamiento: "+(d.d[c]||"reservado");else if(d.r[c]==="Aún no")t+=" · sin alojamiento";
+    return t});
+  return (d.ayuda?"Pide ayuda para repartir las noches\n":"")+ls.join("\n")}
+function rutaHTML(){
+  const d=rutaD(),fe=rutaFechas(d),tot=rutaNoches(),last=d.o.length-1;
+  const sum=d.o.reduce((a,c)=>a+(+d.n[c]||0),0),all=d.o.every(c=>d.n[c]!==undefined&&d.n[c]!==null);
+  let h=`<label class="chip rt-help"><input type="checkbox" data-rhelp${d.ayuda?" checked":""}>Ayúdame a repartir las noches</label>`;
+  if(!d.ayuda&&tot)h+=`<p class="rt-tot${all&&sum!==tot?" warn":""}">Tu viaje tiene <b>${tot} noches</b>${sum?` · llevas <b>${sum}</b>`:""}</p>`;
+  h+=`<ol class="rt">`+d.o.map((c,i)=>{const n=d.n[c],r=d.r[c]||"";
+    const nn=n===undefined||n===null?"—":n===0?"De paso":n+(n===1?" noche":" noches");
+    return `<li class="rc" data-c="${esc(c)}"><div class="rc-h"><span class="rc-n">${i+1}</span><span class="rc-c">${esc(c)}</span>
+      <span class="rc-mv"><button type="button" data-rmv="-1" data-i="${i}" aria-label="Subir ${esc(c)}"${i?"":" disabled"}>↑</button><button type="button" data-rmv="1" data-i="${i}" aria-label="Bajar ${esc(c)}"${i<last?"":" disabled"}>↓</button></span></div>
+      ${d.ayuda?"":`<div class="rc-r"><div><div class="rc-l">Noches</div>${fe[c]?`<div class="rc-d">${esc(fe[c])}</div>`:""}</div><div class="step3"><button type="button" data-rn="-1" data-i="${i}" aria-label="Una noche menos en ${esc(c)}"${n===undefined||n===null?" disabled":""}>−</button><output>${nn}</output><button type="button" data-rn="1" data-i="${i}" aria-label="Una noche más en ${esc(c)}">+</button></div></div>`}
+      <div class="rc-r"><span class="rc-l">Alojamiento</span><div class="chips">${["Reservado","Aún no"].map(o=>`<label class="chip"><input type="radio" name="ra-${i}" data-ra="${i}" value="${o}"${r===o?" checked":""}>${o}</label>`).join("")}</div></div>
+      ${r==="Reservado"?`<input type="text" data-rd="${i}" value="${esc(d.d[c]||"")}" placeholder="Nombre del hotel o dirección" autocomplete="off" aria-label="Alojamiento en ${esc(c)}">`:""}</li>`}).join("")+`</ol>`;
+  return h}
+function rutaPaint(focusSel){const box=document.getElementById("ruta-box");if(!box)return;box.innerHTML=rutaHTML();A.ruta=rutaTexto();save();if(focusSel){const e=box.querySelector(focusSel);if(e&&!e.disabled)e.focus()}}
 function field(q){
+  if(q.ty==="route")return `<div class="q" id="ruta-box">${rutaHTML()}</div>`;
   const h0=field0(q);return q.if?`<div data-if="${q.id}"${shown(q)?"":" hidden"}>${h0}</div>`:h0;
 }
 function tagHTML(t){return `<span class="tag" data-v="${esc(t)}">${esc(t)}<button type="button" class="tagx" aria-label="Quitar ${esc(t)}">×</button></span>`}
@@ -249,18 +306,19 @@ function field0(q){
 }
 
 function render(){
-  const s=STEPS[cur],n=STEPS.length-2;
-  const p=Math.round(Math.min(cur,n+1)/(n+1)*100);
+  const s=STEPS[cur],mid=STEPS.map((x,i)=>i).filter(i=>i>0&&i<STEPS.length-1&&vis(i)),n=mid.length;
+  const pos=s.intro?0:s.final?n+1:mid.indexOf(cur)+1;
+  const p=Math.round(pos/(n+1)*100);
   document.getElementById("prog").style.width=p+"%";document.getElementById("pct").textContent=p+"%";
-  document.getElementById("stepn").textContent=s.intro?"Inicio":s.final?"Terminado":`Paso ${cur} de ${n}`;
+  document.getElementById("stepn").textContent=s.intro?"Inicio":s.final?"Terminado":`Paso ${pos} de ${n}`;
   document.body.classList.toggle("is-intro",!!s.intro);
   bk.hidden=cur===0;nx.hidden=!!s.final;
-  nx.textContent=s.intro?"Empezar":editing?"Volver al resumen":cur===n?"Ver resumen":"Siguiente";
+  nx.textContent=s.intro?"Empezar":editing?"Volver al resumen":pos===n?"Ver resumen":"Siguiente";
   let h="";
   if(s.intro){
     h=`<h1>Tu viaje, diseñado a mano</h1>
     <p class="lead">Una app creada solo para ti. Con tus respuestas diseñaré tu propia app de viaje, con tu itinerario, tus lugares en el mapa, cómo moverte y todo lo práctico, y con detalles pensados para ti. Sirve para cualquier viaje: una ciudad, un tour, una ruta a pie o una aventura.</p>
-    <p>Son ${n} pasos cortos, unos 5 minutos, y casi todo se contesta tocando opciones. Solo es obligatorio tu nombre. Si algo no lo sabes, déjalo en blanco: lo vemos juntos después.</p>`;
+    <p>Son ${n} pasos cortos, unos 5 minutos, y casi todo se contesta tocando opciones. Solo son obligatorios tu nombre y tu email. Si algo no lo sabes, déjalo en blanco: lo vemos juntos después.</p>`;
   }else if(s.final){
     const txt=summary(),sent=getSent(),same=sent&&sent.hash===JSON.stringify(A);
     const when=sent?new Date(sent.at).toLocaleString("es-ES",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"}):"";
@@ -286,7 +344,7 @@ function render(){
   f.innerHTML=`<div class="step">${h}</div>`;
   const pb=document.getElementById("post");
   if(pb)pb.onclick=sendNow;
-  const sk=document.getElementById("skip");if(sk)sk.onclick=()=>{collect();cur++;save();render()};
+  const sk=document.getElementById("skip");if(sk)sk.onclick=()=>{collect();go(1)};
   for(const b of f.querySelectorAll("[data-edit]"))b.onclick=()=>{cur=+b.dataset.edit;editing=true;save();render()};
   window.scrollTo({top:0});
 }
@@ -297,8 +355,8 @@ async function sendNow(){
   pb.disabled=true;pb.textContent="Enviando…";ok.style.color="";ok.textContent="";fb.hidden=true;
   let t0=0;try{t0=+localStorage.getItem(KEY+"-t0")||0}catch(e){}
   let id="";try{id=localStorage.getItem(KEY+"-id")||"";if(!id){id=Date.now().toString(36)+Math.random().toString(36).slice(2,8);localStorage.setItem(KEY+"-id",id)}}catch(e){id="x"+Date.now().toString(36)}
-  const vis={...A};for(const st of STEPS)for(const q of st.f||[])if(!shown(q))vis[q.id]="";
-  const body=JSON.stringify({...vis,_hp:document.getElementById("web").value,_secs:t0?Math.round((Date.now()-t0)/1000):0,_id:id,_cols:STEPS.flatMap(st=>(st.f||[]).map(q=>[q.id,q.c||q.l])),_resumen:STEPS.filter(st=>st.f).map(st=>[st.t,st.f.filter(shown).map(q=>[q.c||q.l,val(q)]).filter(r=>r[1])]).filter(x=>x[1].length)});
+  const out={...A};delete out._ruta;out.ruta=rutaTexto();for(const st of STEPS)for(const q of st.f||[])if(!shown(q))out[q.id]="";
+  const body=JSON.stringify({...out,_hp:document.getElementById("web").value,_secs:t0?Math.round((Date.now()-t0)/1000):0,_id:id,_cols:STEPS.flatMap(st=>(st.f||[]).map(q=>[q.id,q.c||q.l])),_resumen:STEPS.filter((st,i)=>st.f&&vis(i)).map(st=>[st.t,st.f.filter(shown).map(q=>[q.c||q.l,val(q)]).filter(r=>r[1])]).filter(x=>x[1].length)});
   if(/claude\.ai|claudeusercontent|anthropic/.test(location.hostname)){pb.disabled=false;pb.textContent="Enviar mis respuestas";ok.style.color="var(--red)";ok.textContent="Versión de taller: el envío solo funciona desde el enlace de GitHub.";return}
   try{
     if(!CONFIG.endpoint)throw new Error("sin conexión configurada");
@@ -321,20 +379,21 @@ function collect(){
     else if(q.ty==="radio"||q.ty==="style"){const r=f.querySelector(`input[name="${q.id}"]:checked`);A[q.id]=r?r.value:""}
     else if(q.ty==="place"&&q.multi){const e=document.getElementById(q.id);if(e){const extra=e.value.trim().replace(/,+$/,"");A[q.id]=[...tagsOf(e),...(extra?[extra]:[])].join(", ")}}
     else if(q.ty==="count"){const o=document.getElementById(q.id);if(o)A[q.id]=+o.textContent}
+    else if(q.ty==="route"){A.ruta=rutaTexto()}
     else{const e=document.getElementById(q.id);if(e)A[q.id]=e.value.trim().replace(/,\s*$/,"")}
   }
   save();updIf();
 }
 
-function val(q){let v=A[q.id];if(q.ty==="count")v=v===undefined?(q.def||0):v;if(Array.isArray(v))v=v.join(", ");if(q.ty==="date"&&v){const [y,m,d]=v.split("-");v=`${d}/${m}/${y}`}return v===0||v==="0"?"":String(v??"")}
+function val(q){if(q.ty==="route")return rutaTexto();let v=A[q.id];if(q.ty==="count")v=v===undefined?(q.def||0):v;if(Array.isArray(v))v=v.join(", ");if(q.ty==="date"&&v){const [y,m,d]=v.split("-");v=`${d}/${m}/${y}`}return v===0||v==="0"?"":String(v??"")}
 function sections(){
-  return STEPS.map((s,i)=>{if(!s.f)return"";const rows=s.f.filter(shown).map(q=>[q.c||q.l,val(q)]).filter(r=>r[1]);
+  return STEPS.map((s,i)=>{if(!s.f||!vis(i))return"";const rows=s.f.filter(shown).map(q=>[q.c||q.l,val(q)]).filter(r=>r[1]);
     return `<section class="sec"><div class="sech"><h3>${esc(s.t)}</h3><button type="button" class="edit" data-edit="${i}">Editar</button></div>${rows.length?`<dl>${rows.map(r=>`<dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd>`).join("")}</dl>`:`<p class="note">Sin respuestas</p>`}</section>`}).join("");
 }
 function summary(){
   const fmt=d=>{if(!d)return"";const [y,m,dd]=d.split("-");return `${dd}/${m}/${y}`};
   let out=`CUESTIONARIO DE VIAJE – ${A.nombre||"(sin nombre)"}\n`;
-  for(const s of STEPS){if(!s.f)continue;
+  for(const [i,s] of STEPS.entries()){if(!s.f||!vis(i))continue;
     const lines=s.f.filter(shown).map(q=>{const v=val(q);return v?`• ${q.c||q.l}: ${v}`:""}).filter(Boolean);
     if(lines.length)out+=`\n${s.t.toUpperCase()}\n${lines.join("\n")}\n`;}
   return out.trim();
@@ -417,8 +476,16 @@ nx.onclick=()=>{collect();const s=STEPS[cur];
   if(s.f){const miss=s.f.find(q=>q.req&&!A[q.id]);if(miss){const e=document.getElementById("err");e.textContent="Rellena «"+miss.l.replace(/^¿|\?$/g,"")+"» para continuar.";document.getElementById(miss.id)?.focus();return}
     const bad=s.f.find(q=>q.ty==="email"&&A[q.id]&&!okMail(A[q.id]));if(bad){document.getElementById("err").textContent="Revisa tu email, parece que le falta algo.";document.getElementById(bad.id)?.focus();return}}
   if(editing){editing=false;cur=STEPS.length-1;save();render();return}
-  if(cur<STEPS.length-1){cur++;save();render()}};
-bk.onclick=()=>{collect();editing=false;if(cur>0){cur--;save();render()}};
+  go(1)};
+function go(d){let c=cur+d;while(c>0&&c<STEPS.length-1&&!vis(c))c+=d;if(c<0||c>STEPS.length-1)return;cur=c;save();render()}
+bk.onclick=()=>{collect();editing=false;if(cur>0)go(-1)};
+f.addEventListener("click",e=>{const b=e.target.closest("[data-rmv],[data-rn]");if(!b||b.disabled)return;const d=rutaD(),i=+b.dataset.i,c=d.o[i];
+  if(b.dataset.rmv){const j=i+ +b.dataset.rmv;if(j<0||j>=d.o.length)return;[d.o[i],d.o[j]]=[d.o[j],d.o[i]];A.destino=d.o.join(", ");rutaPaint(`[data-rmv="${b.dataset.rmv}"][data-i="${j}"]`);return}
+  const v=d.n[c],nv=v===undefined||v===null?(+b.dataset.rn>0?1:null):Math.max(0,Math.min(60,v+ +b.dataset.rn));d.n[c]=nv;rutaPaint(`[data-rn="${b.dataset.rn}"][data-i="${i}"]`)});
+f.addEventListener("change",e=>{const t=e.target,d=A._ruta;if(!d)return;
+  if(t.hasAttribute("data-rhelp")){d.ayuda=t.checked;rutaPaint("[data-rhelp]")}
+  else if(t.dataset.ra!==undefined){d.r[d.o[+t.dataset.ra]]=t.value;rutaPaint(t.value==="Reservado"?`[data-rd="${t.dataset.ra}"]`:"")}},true);
+f.addEventListener("input",e=>{const t=e.target;if(t.dataset.rd===undefined||!A._ruta)return;A._ruta.d[A._ruta.o[+t.dataset.rd]]=t.value.slice(0,200);A.ruta=rutaTexto();save()});
 render();
 }
 </script>
