@@ -59,10 +59,20 @@ input:focus,textarea:focus,select:focus,.chip:focus-within,button:focus-visible{
 .cgrp:first-of-type{margin-top:4px}
 .cgrp+.chips{gap:6px}
 .cgrp+.chips .chip{font-size:14px;padding:6px 12px;min-height:40px}
-.styles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.styles{display:block}
+.sty.surp{margin-bottom:12px}
+.sty.surp .mock{height:44px}
+.scar{position:relative}
+.strack{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 2px;padding:3px 2px 6px;margin:0 -2px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.strack::-webkit-scrollbar{display:none}
+.strack .sty{flex:0 0 calc((100% - 10px)/2.25);scroll-snap-align:start}
+@media(min-width:620px){.strack .sty{flex-basis:calc((100% - 20px)/3.25)}}
+.snav{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:8px}
+.snav button{width:40px;min-height:40px;padding:0;border-radius:50%;font-size:22px;line-height:1}
+.snav button:disabled{opacity:.3;cursor:default}
+.sdots{display:flex;gap:5px}.sdots i{width:6px;height:6px;border-radius:50%;background:var(--line)}.sdots i.on{background:var(--blue)}
 .sty{position:relative;display:flex;flex-direction:column;gap:2px;padding:8px 8px 10px;border:1.5px solid var(--line);border-radius:14px;background:var(--card);cursor:pointer}
 .sty input{position:absolute;opacity:0;pointer-events:none}
-.sty.surp{grid-column:1/-1}
 .sty:has(input:checked){border-color:var(--blue);box-shadow:0 0 0 2px var(--blue)}
 .sty:has(input:checked) .sname::after{content:" ✓";color:var(--blue)}
 .sty:focus-within{outline:3px solid color-mix(in srgb,var(--blue) 45%,transparent);outline-offset:2px}
@@ -108,6 +118,8 @@ input:focus,textarea:focus,select:focus,.chip:focus-within,button:focus-visible{
 .rc .step3 output{min-width:64px;font-size:15px}
 .rc .chips{gap:6px}.rc .chip{min-height:38px;padding:6px 12px;font-size:14px}
 .rc input[type=text]{margin-top:8px;padding:10px 12px}
+.nsug{margin:10px 0 0}.nsug .chip{font:400 14px Inter,system-ui,sans-serif;min-height:40px;padding:6px 14px}
+.nsug .chip.on{background:var(--blue);border-color:var(--blue);color:#fff}
 .row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{position:relative;display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;border:1.5px solid var(--line);border-radius:999px;cursor:pointer;background:var(--card);font-size:15px;user-select:none}
@@ -171,8 +183,8 @@ const STEPS=[
   {id:"tour",c:"Tour o agencia",l:"¿Qué tour o agencia es?",h:"El nombre o el enlace al programa, si lo tienes a mano",ty:"text",if:["tipo",["Tour organizado"]]},
   {id:"motivo",c:"Motivo",l:"¿Hay algo especial?",ty:"radio",o:["Vacaciones","Luna de miel o aniversario","Cumpleaños o celebración","Visitar familia o amigos","Trabajo y algo de ocio"]},
   {id:"fecha_especial",c:"Fecha de la celebración",l:"¿Qué día es la celebración?",ty:"date",if:["motivo",["Luna de miel o aniversario","Cumpleaños o celebración"]]},
-  {id:"ya_estuvo",c:"Ya estuvo antes",l:"¿Has estado antes en este destino?",ty:"radio",o:["No","Sí"]},
-  {id:"ya_vio",c:"Lo que ya vio",l:"¿Qué viste esa vez?",h:"Así no te propongo lo mismo",ty:"text",if:["ya_estuvo",["Sí"]]}]},
+  {id:"ya_estuvo",single:1,c:"Ya estuvo antes",l:"¿Has estado antes en este destino?",ty:"radio",o:["No","Sí"]},
+  {id:"ya_vio",single:1,c:"Lo que ya vio",l:"¿Qué viste esa vez?",h:"Así no te propongo lo mismo",ty:"text",if:["ya_estuvo",["Sí"]]}]},
  {t:"Fechas",d:"Aunque sean aproximadas, me ayudan mucho.",f:[
   {id:"llegada",c:"Inicio",l:"Día de inicio",ty:"date",half:1},{id:"salida",c:"Regreso",l:"Día de regreso",ty:"date",half:1,minFrom:"llegada"},
   {id:"llega_por",c:"Empieza en",l:"¿Por qué aeropuerto o ciudad llegas?",h:"El aeropuerto, la estación o la ciudad donde empieza tu viaje",ty:"place"},
@@ -182,7 +194,9 @@ const STEPS=[
   {id:"flex",c:"Fechas fijas",l:"¿Las fechas son fijas?",ty:"radio",o:["Sí, ya tengo vuelos","Más o menos","Todavía no lo sé"]}]},
  {t:"Tu ruta",multi:true,d:"Pon las ciudades en el orden en que las visitas y dime cuántas noches duermes en cada una.",f:[
   {id:"ruta",c:"Ruta",ty:"route"},
-  {id:"entre",c:"Entre ciudades",l:"¿Cómo vas de una ciudad a otra?",h:"Puedes marcar varias",ty:"chips",none:"Recomiéndame",o:["Tren","Avión","Bus","Coche","Recomiéndame"]}]},
+  {id:"entre",c:"Entre ciudades",l:"¿Cómo vas de una ciudad a otra?",h:"Puedes marcar varias",ty:"chips",none:"Recomiéndame",o:["Tren","Avión","Bus","Coche","Recomiéndame"]},
+  {id:"ya_estuvo_m",c:"Ya estuvo antes",l:"¿Has estado antes en alguna de estas ciudades?",h:"Marca las que ya conoces",ty:"chips",dyn:1,none:"En ninguna",o:[]},
+  {id:"ya_vio_m",c:"Lo que ya vio",l:"¿Qué viste esa vez?",h:"Así no te propongo lo mismo",ty:"text",if:["ya_estuvo_m","algo"]}]},
  {t:"Lugares y cómo te mueves",d:"Cuéntame qué no te quieres perder y cómo prefieres moverte.",f:[
   {id:"lugares",c:"Lugares y experiencias",l:"¿Algo que no te quieras perder?",h:"Opcional. Un lugar, una atracción, una experiencia…",ty:"textarea"},
   {id:"transporte",c:"Transporte",l:"¿Cómo prefieres moverte?",ty:"chips",o:["Tren","Autobús","Coche de alquiler","Vuelos internos","Barco o ferri","Metro y bus urbano","Taxi / Uber","Transporte del tour","Andando","Bicicleta"]},
@@ -208,13 +222,21 @@ const STEPS=[
   {id:"presu",c:"Gasto diario",l:"Gasto diario por persona, sin alojamiento",ty:"radio",o:["Menos de 50 €","50–100 €","100–200 €","Más de 200 €","Prefiero no decirlo"]},
   {id:"pago",c:"Forma de pago",l:"¿Cómo pagarás normalmente?",ty:"chips",o:["Tarjeta","Efectivo","Móvil (Apple/Google Pay)"]}]},
  {t:"Tu app",d:"Último paso.",f:[
-  {id:"nombre_app",c:"Nombre de la app",l:"¿Cómo quieres que se llame tu app?",h:"Opcional. Si no se te ocurre, te propongo uno",ty:"text"},
+  {id:"nombre_app",c:"Nombre de la app",l:"¿Cómo quieres que se llame tu app?",h:"Opcional. Toca una idea o escribe el tuyo. Si lo dejas en blanco, te propongo uno al preparar tu app",ty:"text",sug:1},
   {id:"estilo",c:"Estilo de la app",l:"¿Qué estilo te gusta más?",h:"Podrás cambiarlo cuando quieras en tu app. Si no lo tienes claro, «Sorpréndeme»",ty:"style",o:[
    {v:"Sorpréndeme",d:"Lo elijo yo pensando en ti",bg:"#ffffff",c:["#e5402b","#1c3fa0","#c9952b","#2f9e6a"],surprise:1},
-   {v:"Noche elegante",d:"Oscuro, azules y dorado",bg:"#0f1522",c:["#8fa3bf","#c9a44c","#2a3a5c"]},
-   {v:"Luminoso",d:"Blanco, azul y toques de color",bg:"#ffffff",c:["#1c3fa0","#e5402b","#cfe0f7"]},
-   {v:"Cálido mediterráneo",d:"Cremas, terracota y oliva",bg:"#f6efe3",c:["#c2603b","#7a8b4a","#e3cfa8"]},
-   {v:"Naturaleza y aventura",d:"Verdes, tierra y cielo",bg:"#e9f0e6",c:["#3e6b48","#8a6a45","#9cc3d5"]}]},
+   {v:"Noche elegante",d:"Oscuro, azul claro y blanco",bg:"#0b0c0f",c:["#b5cbf0","#eef1f5","#151920"]},
+   {v:"Luminoso azul",d:"Blanco, azul cobalto y rojo",bg:"#f6f7fb",c:["#1c3fa0","#e5402b","#e9eefa"]},
+   {v:"Luminoso negro",d:"Blanco, negro y un toque rojo",bg:"#f7f7f5",c:["#111214","#e5402b","#efefec"]},
+   {v:"Cálido mediterráneo",d:"Cremas, terracota y oliva",bg:"#f6efe3",c:["#c2603b","#7a8b4a","#efe3cf"]},
+   {v:"Mar Mediterráneo",d:"Blanco y azul mar",bg:"#f4f8fb",c:["#0b5ea8","#0b5ea8","#e6f0f8"]},
+   {v:"Naturaleza y aventura",d:"Verde bosque, cielo y tierra",bg:"#111d17",c:["#9cc3d5","#8a6a45","#3e6b48"]},
+   {v:"Sepia vintage",d:"Papel antiguo, marrón y oro",bg:"#f3ead8",c:["#6b4423","#b08a3e","#ebdfc6"]},
+   {v:"Atardecer",d:"Oscuro, ciruela y melocotón",bg:"#1e1424",c:["#f7b896","#f7b896","#33223b"]},
+   {v:"Invierno nórdico",d:"Grises claros, negro y rojo",bg:"#eef0f2",c:["#1d2329","#c8322f","#e2e5e9"]},
+   {v:"Rosado lady",d:"Rosa claro y frambuesa",bg:"#fcf1f4",c:["#c94f7c","#c94f7c","#f6e1e8"]},
+   {v:"Morado inclusivo",d:"Oscuro, morado y lavanda",bg:"#17122a",c:["#c4b2ff","#c4b2ff","#2a2148"]},
+   {v:"Alto contraste",d:"Negro, blanco y amarillo. Muy fácil de leer",bg:"#000000",c:["#ffffff","#ffd400","#1c1c1c"]}]},
   {id:"movil",c:"Móvil",l:"Tu teléfono",ty:"radio",o:["iPhone","Android"]},
   {id:"datos",c:"Internet en el viaje",l:"¿Tendrás internet en el móvil durante el viaje?",ty:"radio",o:["Sí","Solo con wifi","No lo sé"]},
   {id:"app_idioma",c:"Idioma de la app",l:"¿En qué idioma quieres la app?",ty:"radio",o:["Español","Inglés","Otro"]},
@@ -232,12 +254,13 @@ const destList=()=>String(A.destino||"").split(",").map(x=>x.trim()).filter(Bool
 const isMulti=()=>destList().length>1;
 for(const st of STEPS)for(const q of st.f||[])if(st.multi)q.multiOnly=1;
 const vis=i=>!STEPS[i].multi||isMulti();
-const shown=q=>{if(q.single&&isMulti())return false;if(q.multiOnly&&!isMulti())return false;if(!q.if)return true;const v=A[q.if[0]];if(q.if[1]===">0")return +v>0;return Array.isArray(v)?v.some(x=>q.if[1].includes(x)):q.if[1].includes(v)};
+const shown=q=>{if(q.single&&isMulti())return false;if(q.multiOnly&&!isMulti())return false;if(!q.if)return true;const v=A[q.if[0]];if(q.if[1]==="algo")return Array.isArray(v)&&v.some(x=>x!=="En ninguna");if(q.if[1]===">0")return +v>0;return Array.isArray(v)?v.some(x=>q.if[1].includes(x)):q.if[1].includes(v)};
 function updIf(){for(const el of f.querySelectorAll("[data-if]")){const q=STEPS[cur].f.find(x=>x.id===el.dataset.if);el.hidden=!shown(q)}}
 
 const KEY="cuestionario-viaje-v2";let A={};try{A=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}
 let cur=0;try{cur=+localStorage.getItem(KEY+"-p")||0}catch(e){}
 if(cur>=STEPS.length)cur=0;
+if(A.estilo==="Luminoso")A.estilo="Luminoso azul";
 const f=document.getElementById("f"),nx=document.getElementById("next"),bk=document.getElementById("back");
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(A));localStorage.setItem(KEY+"-p",cur)}catch(e){}};
@@ -273,9 +296,24 @@ function rutaHTML(){
       ${r==="Reservado"?`<input type="text" data-rd="${i}" value="${esc(d.d[c]||"")}" placeholder="Nombre del hotel o dirección" autocomplete="off" aria-label="Alojamiento en ${esc(c)}">`:""}</li>`}).join("")+`</ol>`;
   return h}
 function rutaPaint(focusSel){const box=document.getElementById("ruta-box");if(!box)return;box.innerHTML=rutaHTML();A.ruta=rutaTexto();save();if(focusSel){const e=box.querySelector(focusSel);if(e&&!e.disabled)e.focus()}}
+function nombresApp(){
+  const ds=destList(),city=x=>x.replace(/\s*\(.*\)\s*$/,"").trim(),pais=x=>{const m=x.match(/\(([^)]+)\)\s*$/);return m?m[1].trim():x.trim()};
+  const cs=ds.map(city),ps=[...new Set(ds.map(pais))],out=[];
+  const g=A.grupo||"",mo=A.motivo||"",lugar=cs.length===1?cs[0]:ps.length===1?ps[0]:"";
+  if(!cs.length)return [];
+  if(cs.length===1)out.push(cs[0],"Escapada a "+cs[0],"Mi viaje a "+cs[0]);
+  else if(cs.length===2)out.push(cs[0]+" y "+cs[1],"De "+cs[0]+" a "+cs[1]);
+  else out.push("De "+cs[0]+" a "+cs[cs.length-1],cs[0]+", "+cs[1]+" y más");
+  if(cs.length>1){if(ps.length===1)out.push((cs.length>2?"Ruta por ":"Escapada a ")+ps[0]);else if(ps.length===2)out.push(ps[0]+" y "+ps[1]);else out.push("Mi gran viaje")}
+  if(/Luna de miel/.test(mo))out.unshift(lugar?"Luna de miel en "+lugar:"Nuestra luna de miel");
+  else if(/Cumpleaños/.test(mo))out.push("Viaje de cumpleaños");
+  const w=lugar||"Viaje";if(/familia/.test(g))out.push(w+" en familia");else if(/pareja/.test(g)&&!/Luna/.test(mo))out.push(w+" en pareja");else if(/amigos/.test(g))out.push(w+" con amigos");
+  return [...new Set(out)].filter(x=>x.length<=34).slice(0,4)}
 function field(q){
+  if(q.sug){const ns=nombresApp(),h0=field0(q);return ns.length?h0.replace(/<\/div>$/,`<div class="chips nsug" aria-label="Ideas de nombre">${ns.map(n=>`<button type="button" class="chip${A[q.id]===n?" on":""}" data-nom="${esc(n)}">${esc(n)}</button>`).join("")}</div></div>`):h0}
+  if(q.dyn){q.o=[...destList(),q.none];if(Array.isArray(A[q.id]))A[q.id]=A[q.id].filter(x=>q.o.includes(x))}
   if(q.ty==="route")return `<div class="q" id="ruta-box">${rutaHTML()}</div>`;
-  const h0=field0(q);return q.if?`<div data-if="${q.id}"${shown(q)?"":" hidden"}>${h0}</div>`:h0;
+  const h0=field0(q);return q.if||q.single?`<div data-if="${q.id}"${shown(q)?"":" hidden"}>${h0}</div>`:h0;
 }
 function tagHTML(t){return `<span class="tag" data-v="${esc(t)}">${esc(t)}<button type="button" class="tagx" aria-label="Quitar ${esc(t)}">×</button></span>`}
 function addTag(inp,val){val=val.trim().replace(/,+$/,"");if(!val)return;const box=inp.parentNode;
@@ -293,7 +331,7 @@ function field0(q){
       return `<label class="chip"><input type="${typ}" name="${q.id}" value="${esc(o)}"${on?" checked":""}>${esc(o)}</label>`}).join("")}</div></fieldset>`;
   }
   if(q.ty==="style"){
-    return `<fieldset class="q" style="border:0;padding:0"><legend class="lab" style="padding:0;font-weight:600;margin-bottom:8px">${esc(q.l)}${h}</legend><div class="styles">${q.o.map(o=>`<label class="sty${o.surprise?" surp":""}"><input type="radio" name="${q.id}" value="${esc(o.v)}"${v===o.v?" checked":""}><span class="mock" style="background:${o.bg}">${o.surprise?`<span class="q-mark" aria-hidden="true">?</span>`:`<span class="mbar" style="background:${o.c[0]}"></span><span class="mline" style="background:${o.c[2]}"></span><span class="mline short" style="background:${o.c[2]}"></span><span class="mpill" style="background:${o.c[1]}"></span>`}<span class="dots">${o.c.map(c=>`<i style="background:${c}"></i>`).join("")}</span></span><span class="sname">${esc(o.v)}</span><span class="sdesc">${esc(o.d)}</span></label>`).join("")}</div></fieldset>`}
+    return `<fieldset class="q" style="border:0;padding:0"><legend class="lab" style="padding:0;font-weight:600;margin-bottom:8px">${esc(q.l)}${h}</legend><div class="styles">${q.o.map((o,oi)=>`${oi===1?`<div class="scar"><div class="strack" id="${q.id}-tr">`:""}<label class="sty${o.surprise?" surp":""}"><input type="radio" name="${q.id}" value="${esc(o.v)}"${v===o.v?" checked":""}><span class="mock" style="background:${o.bg}">${o.surprise?`<span class="q-mark" aria-hidden="true">?</span>`:`<span class="mbar" style="background:${o.c[0]}"></span><span class="mline" style="background:${o.c[2]}"></span><span class="mline short" style="background:${o.c[2]}"></span><span class="mpill" style="background:${o.c[1]}"></span>`}<span class="dots">${o.c.map(c=>`<i style="background:${c}"></i>`).join("")}</span></span><span class="sname">${esc(o.v)}</span><span class="sdesc">${esc(o.d)}</span></label>`).join("")}</div><div class="snav"><button type="button" data-sc="-1" aria-label="Estilos anteriores">‹</button><span class="sdots" aria-hidden="true">${q.o.slice(1).map(()=>"<i></i>").join("")}</span><button type="button" data-sc="1" aria-label="Más estilos">›</button></div></div></div></fieldset>`}
   if(q.ty==="count"){const n=v===undefined||v===""?(q.def||0):+v;
     return `<div class="q cnt"><span class="lab" id="${q.id}-l">${esc(q.l)}</span><div class="step3" role="group" aria-labelledby="${q.id}-l"><button type="button" data-cnt="${q.id}" data-d="-1" aria-label="Quitar uno"${n<=(q.min||0)?" disabled":""}>−</button><output id="${q.id}" data-min="${q.min||0}">${n}</output><button type="button" data-cnt="${q.id}" data-d="1" aria-label="Añadir uno">+</button></div></div>`}
   if(q.ty==="place"&&q.multi){const tags=String(v||"").split(",").map(x=>x.trim()).filter(Boolean);
@@ -346,7 +384,7 @@ function render(){
   if(pb)pb.onclick=sendNow;
   const sk=document.getElementById("skip");if(sk)sk.onclick=()=>{collect();go(1)};
   for(const b of f.querySelectorAll("[data-edit]"))b.onclick=()=>{cur=+b.dataset.edit;editing=true;save();render()};
-  window.scrollTo({top:0});
+  window.scrollTo({top:0});scarInit();
 }
 
 function getSent(){try{return JSON.parse(localStorage.getItem(KEY+"-sent"))}catch(e){return null}}
@@ -356,7 +394,8 @@ async function sendNow(){
   let t0=0;try{t0=+localStorage.getItem(KEY+"-t0")||0}catch(e){}
   let id="";try{id=localStorage.getItem(KEY+"-id")||"";if(!id){id=Date.now().toString(36)+Math.random().toString(36).slice(2,8);localStorage.setItem(KEY+"-id",id)}}catch(e){id="x"+Date.now().toString(36)}
   const out={...A};delete out._ruta;out.ruta=rutaTexto();for(const st of STEPS)for(const q of st.f||[])if(!shown(q))out[q.id]="";
-  const body=JSON.stringify({...out,_hp:document.getElementById("web").value,_secs:t0?Math.round((Date.now()-t0)/1000):0,_id:id,_cols:STEPS.flatMap(st=>(st.f||[]).map(q=>[q.id,q.c||q.l])),_resumen:STEPS.filter((st,i)=>st.f&&vis(i)).map(st=>[st.t,st.f.filter(shown).map(q=>[q.c||q.l,val(q)]).filter(r=>r[1])]).filter(x=>x[1].length)});
+  if(isMulti()){const ds=destList(),m=(A.ya_estuvo_m||[]).filter(x=>ds.includes(x)||x==="En ninguna");out.ya_estuvo=m.join(", ");out.ya_vio=out.ya_vio_m||""}delete out.ya_estuvo_m;delete out.ya_vio_m;
+  const body=JSON.stringify({...out,_hp:document.getElementById("web").value,_secs:t0?Math.round((Date.now()-t0)/1000):0,_id:id,_cols:STEPS.flatMap(st=>(st.f||[]).filter(q=>!/_m$/.test(q.id)).map(q=>[q.id,q.c||q.l])),_resumen:STEPS.filter((st,i)=>st.f&&vis(i)).map(st=>[st.t,st.f.filter(shown).map(q=>[q.c||q.l,val(q)]).filter(r=>r[1])]).filter(x=>x[1].length)});
   if(/claude\.ai|claudeusercontent|anthropic/.test(location.hostname)){pb.disabled=false;pb.textContent="Enviar mis respuestas";ok.style.color="var(--red)";ok.textContent="Versión de taller: el envío solo funciona desde el enlace de GitHub.";return}
   try{
     if(!CONFIG.endpoint)throw new Error("sin conexión configurada");
@@ -479,6 +518,18 @@ nx.onclick=()=>{collect();const s=STEPS[cur];
   go(1)};
 function go(d){let c=cur+d;while(c>0&&c<STEPS.length-1&&!vis(c))c+=d;if(c<0||c>STEPS.length-1)return;cur=c;save();render()}
 bk.onclick=()=>{collect();editing=false;if(cur>0)go(-1)};
+function scarUpd(tr){const nav=tr.parentNode.querySelector(".snav");if(!nav)return;const cs=[...tr.children],w=cs[0]?cs[0].offsetWidth+10:1;
+  const i=Math.round(tr.scrollLeft/w),vis=Math.max(1,Math.round(tr.clientWidth/w)),last=Math.max(0,cs.length-vis);
+  nav.querySelectorAll(".sdots i").forEach((d,k)=>d.classList.toggle("on",k>=Math.min(i,last)&&k<Math.min(i,last)+vis));
+  nav.querySelector('[data-sc="-1"]').disabled=tr.scrollLeft<4;nav.querySelector('[data-sc="1"]').disabled=tr.scrollLeft+tr.clientWidth>=tr.scrollWidth-4}
+function scarInit(){const tr=f.querySelector(".strack");if(!tr)return;const on=tr.querySelector("input:checked");
+  if(on){const l=on.closest(".sty");tr.scrollLeft=Math.max(0,l.offsetLeft-tr.offsetLeft-2)}
+  scarUpd(tr);tr.addEventListener("scroll",()=>{cancelAnimationFrame(tr._r);tr._r=requestAnimationFrame(()=>scarUpd(tr))},{passive:true})}
+f.addEventListener("click",e=>{const b=e.target.closest("[data-sc]");if(!b)return;const tr=b.closest(".scar").querySelector(".strack"),w=tr.children[0].offsetWidth+10;
+  tr.scrollBy({left:+b.dataset.sc*w*Math.max(1,Math.floor(tr.clientWidth/w)),behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"})});
+f.addEventListener("click",e=>{const b=e.target.closest("[data-nom]");if(!b)return;const i=document.getElementById("nombre_app");i.value=b.dataset.nom;A.nombre_app=b.dataset.nom;save();
+  for(const c of f.querySelectorAll("[data-nom]"))c.classList.toggle("on",c===b)});
+f.addEventListener("input",e=>{if(e.target.id!=="nombre_app")return;for(const c of f.querySelectorAll("[data-nom]"))c.classList.toggle("on",c.dataset.nom===e.target.value.trim())});
 f.addEventListener("click",e=>{const b=e.target.closest("[data-rmv],[data-rn]");if(!b||b.disabled)return;const d=rutaD(),i=+b.dataset.i,c=d.o[i];
   if(b.dataset.rmv){const j=i+ +b.dataset.rmv;if(j<0||j>=d.o.length)return;[d.o[i],d.o[j]]=[d.o[j],d.o[i]];A.destino=d.o.join(", ");rutaPaint(`[data-rmv="${b.dataset.rmv}"][data-i="${j}"]`);return}
   const v=d.n[c],nv=v===undefined||v===null?(+b.dataset.rn>0?1:null):Math.max(0,Math.min(60,v+ +b.dataset.rn));d.n[c]=nv;rutaPaint(`[data-rn="${b.dataset.rn}"][data-i="${i}"]`)});
