@@ -57,7 +57,7 @@ button.go:disabled{opacity:.6}
 <main>
 <form id="f" novalidate>
   <h1 id="tit">¿Qué tal tu viaje?</h1>
-  <p class="lead" id="lead">Me ayudas mucho contándome cómo te fue con tu app. Son 6 preguntas y tardas un minuto.</p>
+  <p class="lead" id="lead">Me ayudas mucho contándome cómo te fue con tu app. Son unas pocas preguntas y tardas un minuto.</p>
 
   <fieldset class="q"><legend class="lab">¿Qué tal te fue la app? *</legend>
     <div class="stars" id="stars"></div><div class="stars-t" id="starsT" aria-live="polite"></div></fieldset>
@@ -67,6 +67,9 @@ button.go:disabled{opacity:.6}
 
   <div class="q"><label class="lab" for="mejorar">¿Qué te faltó o qué mejorarías?<span class="hint">Opcional. Lo que sea, me sirve todo</span></label>
     <textarea id="mejorar" maxlength="1500"></textarea></div>
+
+  <fieldset class="q" id="agQ" hidden><legend class="lab">¿Cambiaste la agenda durante el viaje?</legend>
+    <div class="chips" id="agenda"></div></fieldset>
 
   <fieldset class="q"><legend class="lab">¿Se la recomendarías a un amigo?<span class="hint">0 = nada, 10 = seguro que sí</span></legend>
     <div class="nps" id="nps"></div><div class="nps-e"><span>Nada</span><span>Seguro que sí</span></div></fieldset>
@@ -94,12 +97,13 @@ button.go:disabled{opacity:.6}
 <script>
 const ENDPOINT="https://script.google.com/macros/s/AKfycbxltkhw0Dy11zHz4JhHolvgegaVB9Yr_iuXph2bZWxvZ-Tp5vzkCdG-xmcXddK_s3KURA/exec";
 const P=new URLSearchParams(location.search);
+const MODO=P.get("m")||"";
 const APP=(P.get("a")||"").slice(0,80),ENV=(P.get("i")||"").replace(/[^a-z0-9]/gi,"").slice(0,40),NOM=(P.get("n")||"").slice(0,40);
 const KEY="tvdm-opinion:"+(APP||ENV||"general");
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const $=id=>document.getElementById(id),t0=Date.now();
 if(NOM)$("tit").textContent="¿Qué tal tu viaje, "+NOM+"?";
-if(APP)$("lead").innerHTML="Me ayudas mucho contándome cómo te fue con <b>"+esc(APP)+"</b>. Son 6 preguntas y tardas un minuto.";
+if(APP)$("lead").innerHTML="Me ayudas mucho contándome cómo te fue con <b>"+esc(APP)+"</b>. Son unas pocas preguntas y tardas un minuto.";
 $("firma").value=NOM;
 
 const TXT=["","No me sirvió","Regular","Bien","Muy bien","¡Me encantó!"];
@@ -109,7 +113,9 @@ const pintaStars=()=>{const v=+(document.querySelector("[name=estrellas]:checked
 $("stars").addEventListener("change",pintaStars);
 
 const chips=(id,name,opts,type)=>$(id).innerHTML=opts.map(o=>`<label class="chip"><input type="${type}" name="${name}" value="${esc(o)}">${esc(o)}</label>`).join("");
-chips("uso","uso",["Itinerario día a día","Mapa","Dónde comer","Tiempo y ropa","Gastos","Consejos y rincones","Otra cosa"],"checkbox");
+chips("uso","uso",["El plan del día","Mapa","Dónde estoy","Cerca de mí","Comer","Tiempo y ropa","Gastos","Mis fotos o video","Otra cosa"],"checkbox");
+chips("agenda","agenda",["Nada","Algunos días","Casi todo"],"radio");
+if(MODO==="c")$("agQ").hidden=false;
 chips("precio","precio",["Solo la usaría gratis","Menos de 20 €","De 20 a 50 €","De 50 a 100 €","Más de 100 €"],"radio");
 chips("publicar","publicar",["Sí, con mi nombre","Sí, solo con mis iniciales","No, es solo para ti"],"radio");
 $("nps").innerHTML=[...Array(11).keys()].map(n=>`<label><input type="radio" name="nps" value="${n}">${n}</label>`).join("");
@@ -129,7 +135,7 @@ $("send").onclick=async()=>{
   if(com&&!pub){err.textContent="Dime si puedo publicar tu comentario.";$("pubQ").scrollIntoView({behavior:"smooth",block:"center"});return}
   const d={_tipo:"opinion",_hp:$("web").value,_secs:Math.round((Date.now()-t0)/1000),app:APP,envio:ENV,nombre:NOM,
     estrellas:+est,uso:[...document.querySelectorAll("[name=uso]:checked")].map(x=>x.value).join(", "),
-    mejorar:$("mejorar").value.trim(),nps:val("nps"),precio:val("precio"),comentario:com,publicar:pub,
+    mejorar:$("mejorar").value.trim(),agenda:val("agenda"),nps:val("nps"),precio:val("precio"),comentario:com,publicar:pub,
     firma:pub.startsWith("Sí")?$("firma").value.trim():""};
   if(!/(^|\.)github\.io$/.test(location.hostname)){err.textContent="Versión de taller: aquí no se envía. En la web publicada sí.";return}
   const b=$("send");b.disabled=true;b.textContent="Enviando…";
