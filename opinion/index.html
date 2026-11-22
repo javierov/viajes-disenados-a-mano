@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>¿Qué tal tu viaje? · Tu viaje, diseñado a mano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#0c1730);--ink:light-dark(#14213d,#eef2fb);--soft:light-dark(#5a6684,#a9b4cf);
+--blue:light-dark(#1c3fa0,#7d9bf0);--blue2:light-dark(#e8eefb,#16264d);--red:#e5402b;--line:light-dark(#d6ddee,#26365f);--card:light-dark(#ffffff,#111f40);--gold:#e0a526}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif}
+header{border-top:4px solid var(--blue);text-align:center;padding:22px 16px 0}
+.marca{font:400 22px/1.2 "DM Serif Display",Georgia,serif;color:var(--blue)}
+main{max-width:600px;margin:0 auto;padding:22px max(5vw,16px) 120px}
+h1{font:400 clamp(32px,7vw,44px)/1.08 "DM Serif Display",Georgia,serif;margin:0 0 10px;text-wrap:balance}
+.lead{color:var(--soft);margin:0 0 26px}
+.q{margin:0 0 30px;border:0;padding:0}
+.lab{display:block;font-weight:600;font-size:17px;line-height:1.35;margin:0 0 4px;padding:0}
+.hint{display:block;color:var(--soft);font-size:14px;font-weight:400;margin:0 0 10px}
+.stars{display:flex;gap:6px}
+.stars label{cursor:pointer;font-size:38px;line-height:1;color:var(--line);transition:transform .12s}
+.stars label:active{transform:scale(.9)}
+.stars label.on{color:var(--gold)}
+.stars input,.chips input,.nps input{position:absolute;opacity:0;pointer-events:none}
+.stars-t{color:var(--soft);font-size:14px;min-height:21px;margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;min-height:44px;padding:8px 16px;border:1.5px solid var(--line);border-radius:999px;cursor:pointer;background:var(--card);font-size:15px}
+.chip:has(input:checked){background:var(--blue);border-color:var(--blue);color:#fff}
+.chip:focus-within,.nps label:focus-within,.stars label:focus-within{outline:3px solid color-mix(in srgb,var(--blue) 45%,transparent);outline-offset:2px}
+.col{flex-direction:column;align-items:stretch}.col .chip{border-radius:14px}
+.nps{display:grid;grid-template-columns:repeat(11,1fr);gap:4px}
+.nps label{display:grid;place-items:center;height:44px;border:1.5px solid var(--line);border-radius:10px;cursor:pointer;font-weight:600;font-size:15px;background:var(--card)}
+.nps label:has(input:checked){background:var(--blue);border-color:var(--blue);color:#fff}
+.nps-e{display:flex;justify-content:space-between;color:var(--soft);font-size:13px;margin-top:6px}
+textarea,input[type=text]{width:100%;font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px}
+textarea{min-height:96px;resize:vertical}
+textarea:focus,input[type=text]:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px color-mix(in srgb,var(--blue) 25%,transparent)}
+[hidden]{display:none!important}
+.bar{position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(6px);border-top:1px solid var(--line);padding:12px max(5vw,16px) max(12px,env(safe-area-inset-bottom))}
+.bar div{max-width:600px;margin:0 auto}
+button.go{width:100%;min-height:54px;border:0;border-radius:16px;background:var(--red);color:#fff;font:600 18px Inter,sans-serif;cursor:pointer}
+button.go:disabled{opacity:.6}
+#err{color:var(--red);font-size:14px;margin:0 0 8px;min-height:0}
+#err:empty{display:none}
+.web{position:absolute;left:-9999px}
+.gracias{text-align:center;padding-top:30px}
+.gracias .ico{font-size:52px;line-height:1;color:var(--gold)}
+@media (max-width:380px){.nps{grid-template-columns:repeat(6,1fr)}.nps-e span:nth-child(2){display:none}}
+</style>
+</head>
+<body>
+<header><div class="marca">Tu viaje, diseñado a mano</div></header>
+<main>
+<form id="f" novalidate>
+  <h1 id="tit">¿Qué tal tu viaje?</h1>
+  <p class="lead" id="lead">Me ayudas mucho contándome cómo te fue con tu app. Son 6 preguntas y tardas un minuto.</p>
+
+  <fieldset class="q"><legend class="lab">¿Qué tal te fue la app? *</legend>
+    <div class="stars" id="stars"></div><div class="stars-t" id="starsT" aria-live="polite"></div></fieldset>
+
+  <fieldset class="q"><legend class="lab">¿Qué usaste más?<span class="hint">Puedes marcar varias</span></legend>
+    <div class="chips" id="uso"></div></fieldset>
+
+  <div class="q"><label class="lab" for="mejorar">¿Qué te faltó o qué mejorarías?<span class="hint">Opcional. Lo que sea, me sirve todo</span></label>
+    <textarea id="mejorar" maxlength="1500"></textarea></div>
+
+  <fieldset class="q"><legend class="lab">¿Se la recomendarías a un amigo?<span class="hint">0 = nada, 10 = seguro que sí</span></legend>
+    <div class="nps" id="nps"></div><div class="nps-e"><span>Nada</span><span>Seguro que sí</span></div></fieldset>
+
+  <fieldset class="q"><legend class="lab">¿Cuánto te parecería justo pagar por una app así?<span class="hint">Por un viaje como el tuyo. Me ayuda a poner precios</span></legend>
+    <div class="chips col" id="precio"></div></fieldset>
+
+  <div class="q"><label class="lab" for="comentario">Cuéntame tu experiencia en pocas palabras<span class="hint">Opcional</span></label>
+    <textarea id="comentario" maxlength="1000" placeholder="Por ejemplo: qué fue lo que más te sirvió durante el viaje"></textarea></div>
+
+  <fieldset class="q" id="pubQ" hidden><legend class="lab">¿Puedo publicar tu comentario en mi web?</legend>
+    <div class="chips col" id="publicar"></div>
+    <div id="firmaQ" hidden style="margin-top:12px"><label class="lab" for="firma" style="font-size:15px">¿Con qué nombre lo firmo?</label>
+      <input type="text" id="firma" maxlength="60" autocomplete="name"></div></fieldset>
+
+  <input class="web" type="text" id="web" tabindex="-1" autocomplete="off" aria-hidden="true">
+</form>
+<div class="gracias" id="ok" hidden>
+  <div class="ico" aria-hidden="true">★</div>
+  <h1>¡Gracias!</h1>
+  <p class="lead" id="okT">Tu opinión me ayuda a hacer cada app mejor que la anterior.</p>
+</div>
+</main>
+<div class="bar" id="bar"><div><p id="err" role="alert"></p><button class="go" id="send" type="button">Enviar mi opinión</button></div></div>
+<script>
+const ENDPOINT="https://script.google.com/macros/s/AKfycbxltkhw0Dy11zHz4JhHolvgegaVB9Yr_iuXph2bZWxvZ-Tp5vzkCdG-xmcXddK_s3KURA/exec";
+const P=new URLSearchParams(location.search);
+const APP=(P.get("a")||"").slice(0,80),ENV=(P.get("i")||"").replace(/[^a-z0-9]/gi,"").slice(0,40),NOM=(P.get("n")||"").slice(0,40);
+const KEY="tvdm-opinion:"+(APP||ENV||"general");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const $=id=>document.getElementById(id),t0=Date.now();
+if(NOM)$("tit").textContent="¿Qué tal tu viaje, "+NOM+"?";
+if(APP)$("lead").innerHTML="Me ayudas mucho contándome cómo te fue con <b>"+esc(APP)+"</b>. Son 6 preguntas y tardas un minuto.";
+$("firma").value=NOM;
+
+const TXT=["","No me sirvió","Regular","Bien","Muy bien","¡Me encantó!"];
+$("stars").innerHTML=[1,2,3,4,5].map(n=>`<label aria-label="${n} de 5"><input type="radio" name="estrellas" value="${n}">★</label>`).join("");
+const pintaStars=()=>{const v=+(document.querySelector("[name=estrellas]:checked")||{}).value||0;
+  document.querySelectorAll("#stars label").forEach((l,i)=>l.classList.toggle("on",i<v));$("starsT").textContent=TXT[v]||""};
+$("stars").addEventListener("change",pintaStars);
+
+const chips=(id,name,opts,type)=>$(id).innerHTML=opts.map(o=>`<label class="chip"><input type="${type}" name="${name}" value="${esc(o)}">${esc(o)}</label>`).join("");
+chips("uso","uso",["Itinerario día a día","Mapa","Dónde comer","Tiempo y ropa","Gastos","Consejos y rincones","Otra cosa"],"checkbox");
+chips("precio","precio",["Solo la usaría gratis","Menos de 20 €","De 20 a 50 €","De 50 a 100 €","Más de 100 €"],"radio");
+chips("publicar","publicar",["Sí, con mi nombre","Sí, solo con mis iniciales","No, es solo para ti"],"radio");
+$("nps").innerHTML=[...Array(11).keys()].map(n=>`<label><input type="radio" name="nps" value="${n}">${n}</label>`).join("");
+
+const upd=()=>{const c=$("comentario").value.trim().length>0;$("pubQ").hidden=!c;
+  const p=(document.querySelector("[name=publicar]:checked")||{}).value||"";$("firmaQ").hidden=!(c&&p.startsWith("Sí"))};
+$("f").addEventListener("input",upd);$("f").addEventListener("change",upd);
+
+// Ya contestada en este móvil
+try{if(localStorage.getItem(KEY)){$("f").hidden=true;$("bar").hidden=true;$("ok").hidden=false;$("okT").textContent="Ya me enviaste tu opinión desde este móvil. ¡Gracias otra vez!"}}catch(e){}
+
+const val=n=>(document.querySelector(`[name=${n}]:checked`)||{}).value||"";
+$("send").onclick=async()=>{
+  const err=$("err");err.textContent="";
+  const est=val("estrellas");if(!est){err.textContent="Toca las estrellas para valorar la app.";$("stars").scrollIntoView({behavior:"smooth",block:"center"});return}
+  const com=$("comentario").value.trim(),pub=com?val("publicar"):"";
+  if(com&&!pub){err.textContent="Dime si puedo publicar tu comentario.";$("pubQ").scrollIntoView({behavior:"smooth",block:"center"});return}
+  const d={_tipo:"opinion",_hp:$("web").value,_secs:Math.round((Date.now()-t0)/1000),app:APP,envio:ENV,nombre:NOM,
+    estrellas:+est,uso:[...document.querySelectorAll("[name=uso]:checked")].map(x=>x.value).join(", "),
+    mejorar:$("mejorar").value.trim(),nps:val("nps"),precio:val("precio"),comentario:com,publicar:pub,
+    firma:pub.startsWith("Sí")?$("firma").value.trim():""};
+  if(!/(^|\.)github\.io$/.test(location.hostname)){err.textContent="Versión de taller: aquí no se envía. En la web publicada sí.";return}
+  const b=$("send");b.disabled=true;b.textContent="Enviando…";
+  try{const r=await fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(d)});const j=await r.json();
+    if(!j.ok)throw new Error(j.error||"x");
+    try{localStorage.setItem(KEY,new Date().toISOString())}catch(e){}
+    $("f").hidden=true;$("bar").hidden=true;$("ok").hidden=false;scrollTo({top:0})}
+  catch(e){b.disabled=false;b.textContent="Enviar mi opinión";
+    err.textContent=e.message==="rapido"?"Revisa tus respuestas un momento y vuelve a enviar.":e.message==="espera"?"Espera un minuto y vuelve a intentarlo.":"No se pudo enviar. Revisa tu conexión y vuelve a intentarlo."}
+};
+</script>
+</body>
+</html>
