@@ -164,10 +164,24 @@ $("send").onclick=async()=>{
   try{const r=await fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(d)});const j=await r.json();
     if(!j.ok)throw new Error(j.error||"x");
     try{localStorage.setItem(KEY,new Date().toISOString())}catch(e){}
-    $("f").hidden=true;$("bar").hidden=true;$("ok").hidden=false;scrollTo({top:0})}
+    $("f").hidden=true;$("bar").hidden=true;$("ok").hidden=false;scrollTo({top:0});try{window.tvdmStat&&window.tvdmStat("enviada"+(APP?": "+APP:""))}catch(e){}}
   catch(e){b.disabled=false;b.textContent="Enviar mi opinión";
     err.textContent=e.message==="rapido"?"Revisa tus respuestas un momento y vuelve a enviar.":e.message==="espera"?"Espera un minuto y vuelve a intentarlo.":"No se pudo enviar. Revisa tu conexión y vuelve a intentarlo."}
 };
+</script>
+<script>
+/* Estadísticas anónimas para Javier (GoatCounter). Sin cookies ni datos personales. Solo en github.io. */
+(function(){
+  var H=location.hostname;if(!/(^|\.)github\.io$/.test(H))return;
+  var Q=location.search;try{if(/[?&]yo\b/.test(Q))localStorage.setItem("javierov-nostats","1");if(localStorage.getItem("javierov-nostats"))return}catch(e){}
+  var demo="";try{var m=Q.match(/[?&]de=([^&]+)/);if(m){var d=decodeURIComponent(m[1]);if(d==="no")localStorage.removeItem("javierov-demo");else localStorage.setItem("javierov-demo",d)}demo=localStorage.getItem("javierov-demo")||""}catch(e){}
+  var APP="Encuesta",seen={};
+  function send(path,title,ev){var u="https://javierov.goatcounter.com/count?p="+encodeURIComponent(path)+"&t="+encodeURIComponent(title)+(ev?"&e=true":"")+
+    "&s="+encodeURIComponent(screen.width+","+screen.height+","+(window.devicePixelRatio||1))+(document.referrer&&!ev?"&r="+encodeURIComponent(document.referrer):"")+"&rnd="+Math.random().toString(36).slice(2);
+    var i=new Image();i.src=u}
+  window.tvdmStat=function(txt){var k=APP+" · "+txt;if(seen[k])return;seen[k]=1;send((demo?"demo:"+demo+" · ":"")+k,k,true)};
+  if(demo)window.tvdmStat("abrió");else send(location.pathname,document.title,false);
+})();
 </script>
 </body>
 </html>

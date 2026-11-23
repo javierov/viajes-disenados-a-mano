@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tu viaje, diseñado a mano</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -350,7 +351,7 @@ function field0(q){
   return `<div class="q"><label for="${q.id}">${esc(q.l)}${q.req?" *":""}${inf}${h}</label>${q.info?`<p class="bub" id="${q.id}-info" hidden>${esc(q.info)}</p>`:""}${inp}</div>`;
 }
 
-function render(){
+function render(){try{const st=STEPS[cur];window.tvdmStat&&window.tvdmStat(st.intro?"portada":st.final?"resumen":"paso: "+st.t)}catch(e){}
   const s=STEPS[cur],mid=STEPS.map((x,i)=>i).filter(i=>i>0&&i<STEPS.length-1&&vis(i)),n=mid.length;
   const pos=s.intro?0:s.final?n+1:mid.indexOf(cur)+1;
   const p=Math.round(pos/(n+1)*100);
@@ -410,7 +411,7 @@ async function sendNow(){
     let j={};try{j=await r.json()}catch(e){j={ok:r.ok}}
     if(j.ok){
       try{localStorage.setItem(KEY+"-sent",JSON.stringify({at:Date.now(),hash:JSON.stringify(A)}))}catch(e){}
-      pb.textContent="Enviado ✓";ok.textContent="¡Recibido! Ya tengo tus respuestas."+(A.email?" Te he enviado una copia a "+A.email+" (si no la ves, mira en spam).":" Te escribiré pronto.");
+      pb.textContent="Enviado ✓";try{window.tvdmStat&&window.tvdmStat("enviado")}catch(e){}ok.textContent="¡Recibido! Ya tengo tus respuestas."+(A.email?" Te he enviado una copia a "+A.email+" (si no la ves, mira en spam).":" Te escribiré pronto.");
       document.getElementById("flead").textContent="Tus respuestas ya están enviadas. ¡Muchas gracias!";const fh=document.getElementById("fh");fh.textContent=fh.textContent.replace("¡Casi listo","¡Gracias");return}
     if(j.error==="espera"){pb.textContent="Enviar los cambios";ok.style.color="var(--red)";ok.textContent="Acabo de recibir un envío tuyo. Espera un minuto antes de enviar otra vez.";setTimeout(()=>pb.disabled=false,60000);return}
     throw new Error(j.error||"error");
@@ -546,6 +547,20 @@ f.addEventListener("change",e=>{const t=e.target,d=A._ruta;if(!d)return;
 f.addEventListener("input",e=>{const t=e.target;if(t.dataset.rd===undefined||!A._ruta)return;A._ruta.d[A._ruta.o[+t.dataset.rd]]=t.value.slice(0,200);A.ruta=rutaTexto();save()});
 render();
 }
+</script>
+<script>
+/* Estadísticas anónimas para Javier (GoatCounter). Sin cookies ni datos personales. Solo en github.io. */
+(function(){
+  var H=location.hostname;if(!/(^|\.)github\.io$/.test(H))return;
+  var Q=location.search;try{if(/[?&]yo\b/.test(Q))localStorage.setItem("javierov-nostats","1");if(localStorage.getItem("javierov-nostats"))return}catch(e){}
+  var demo="";try{var m=Q.match(/[?&]de=([^&]+)/);if(m){var d=decodeURIComponent(m[1]);if(d==="no")localStorage.removeItem("javierov-demo");else localStorage.setItem("javierov-demo",d)}demo=localStorage.getItem("javierov-demo")||""}catch(e){}
+  var APP="Cuestionario",seen={};
+  function send(path,title,ev){var u="https://javierov.goatcounter.com/count?p="+encodeURIComponent(path)+"&t="+encodeURIComponent(title)+(ev?"&e=true":"")+
+    "&s="+encodeURIComponent(screen.width+","+screen.height+","+(window.devicePixelRatio||1))+(document.referrer&&!ev?"&r="+encodeURIComponent(document.referrer):"")+"&rnd="+Math.random().toString(36).slice(2);
+    var i=new Image();i.src=u}
+  window.tvdmStat=function(txt){var k=APP+" · "+txt;if(seen[k])return;seen[k]=1;send((demo?"demo:"+demo+" · ":"")+k,k,true)};
+  if(demo)window.tvdmStat("abrió");else send(location.pathname,document.title,false);
+})();
 </script>
 </body>
 </html>
