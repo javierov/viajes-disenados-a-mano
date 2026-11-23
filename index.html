@@ -55,6 +55,8 @@ input:focus,textarea:focus,select:focus,.chip:focus-within,button:focus-visible{
 .sug button+button{border-top:1px solid var(--line)}
 .sug button:hover,.sug button.on{background:var(--blue2)}
 .sug small{color:var(--soft);font-weight:400;white-space:nowrap}
+.incl{margin:2px 0 6px;padding:12px 14px;border-radius:12px;background:var(--blue2);font-size:14px;line-height:1.45}
+.incl b{display:block;color:var(--blue);margin-bottom:2px}
 .cgrp{font-size:13px;font-weight:600;color:var(--soft);margin:14px 0 8px}
 .cgrp:first-of-type{margin-top:4px}
 .cgrp+.chips{gap:6px}
@@ -179,8 +181,9 @@ const STEPS=[
   {id:"edades_ninos",c:"Edades de los niños",l:"¿Qué edades tienen los niños?",h:"Ejemplo: 6 y 9",ty:"text",if:["ninos",">0"]}]},
  {t:"Tu viaje",d:"La idea general. No hace falta tenerlo todo decidido.",f:[
   {id:"destino",c:"Destino",l:"¿A dónde vas?",h:"Escribe y elige de la lista. Puedes poner varios",ty:"place",multi:1},
-  {id:"tipo",c:"Tipo de viaje",l:"¿Qué tipo de viaje es?",ty:"chips",o:["Recorrer ciudades","Tour organizado","Ruta a pie o peregrinación","Parque temático","Naturaleza y aventura","Playa y descanso","Crucero","Ruta en coche","Nieve o auroras boreales","Viaje de trabajo"]},
-  {id:"tour",c:"Tour o agencia",l:"¿Qué tour o agencia es?",h:"El nombre o el enlace al programa, si lo tienes a mano",ty:"text",if:["tipo",["Tour organizado"]]},
+  {id:"tipo",c:"Tipo de viaje",l:"¿Qué tipo de viaje es?",ty:"chips",o:["Recorrer ciudades","Ruta a pie o peregrinación","Parque temático","Naturaleza y aventura","Playa y descanso","Crucero","Ruta en coche","Nieve o auroras boreales","Viaje de trabajo"]},
+  {id:"modo",c:"Modo de viaje",l:"¿Cómo viajas?",ty:"radio",o:["Con un tour o agencia: la agenda la marcan ellos","Por mi cuenta, a mi ritmo","Una mezcla de los dos"]},
+  {id:"tour",c:"Tour o agencia",l:"¿Qué tour o agencia es?",h:"El nombre o el enlace al programa, si lo tienes a mano",ty:"text",if:["modo",["Con un tour o agencia: la agenda la marcan ellos","Una mezcla de los dos"]]},
   {id:"motivo",c:"Motivo",l:"¿Hay algo especial?",ty:"radio",o:["Vacaciones","Luna de miel o aniversario","Cumpleaños o celebración","Visitar familia o amigos","Trabajo y algo de ocio"]},
   {id:"fecha_especial",c:"Fecha de la celebración",l:"¿Qué día es la celebración?",ty:"date",if:["motivo",["Luna de miel o aniversario","Cumpleaños o celebración"]]},
   {id:"ya_estuvo",single:1,c:"Ya estuvo antes",l:"¿Has estado antes en este destino?",ty:"radio",o:["No","Sí"]},
@@ -241,10 +244,13 @@ const STEPS=[
   {id:"datos",c:"Internet en el viaje",l:"¿Tendrás internet en el móvil durante el viaje?",ty:"radio",o:["Sí","Solo con wifi","No lo sé"]},
   {id:"app_idioma",c:"Idioma de la app",l:"¿En qué idioma quieres la app?",ty:"radio",o:["Español","Inglés","Otro"]},
   {id:"app_idioma_otro",c:"Otro idioma de la app",l:"¿En qué otro idioma?",ty:"text",if:["app_idioma",["Otro"]]},
-  {id:"app_cosas",c:"Qué quiere en la app",l:"¿Qué quieres que tenga tu app?",h:"Toca todo lo que te sirva. Si no lo sabes, déjalo: incluiré lo esencial",ty:"chips",g:[
-   ["Para organizarte",["Itinerario día a día","Cuenta atrás para el viaje","Lista de tareas antes de salir","Mis reservas y entradas","Horarios de transporte","Documentos y visados"]],
-   ["Durante el viaje",["Mapa con mis lugares","Conversor de monedas","Control de gastos","Tiempo y qué ropa llevar","Lista de equipaje","Frases útiles en el idioma local","Teléfonos de emergencia","Funcionar sin internet"]],
-   ["Para descubrir",["Restaurantes recomendados","Lugares secretos y poco conocidos","Excursiones de un día","Fotos de cada destino"]]]},
+  {id:"app_cosas",c:"Qué quiere en la app",l:"¿Qué extras quieres en tu app?",h:"Toca lo que te sirva. Si no lo tienes claro, déjalo: te propongo yo",ty:"chips",
+   inc:"Tu plan día a día, un mapa con tus lugares y «Dónde estoy», el tiempo y qué ropa llevar. Se instala en el móvil y funciona sin internet.",g:[
+   ["Tu viaje",["Cuenta atrás para el viaje","Mis vuelos con su estado en directo","Lugares secretos que se abren cada día","Excursiones de un día","Plan B si llueve","Lo que cuesta cada día","Cambiar la agenda a mi ritmo"]],
+   ["Mapa",["Cerca de mí: bares, farmacias, cajeros, baños…"]],
+   ["Comer y lo tuyo",["Dónde comer","Una sección de lo que me apasiona: moda, pastelerías, compras, noche, playas…"]],
+   ["Útil",["Mis reservas y entradas","Trayectos y horarios","Gastos y presupuesto","Conversor de monedas","Teléfonos de emergencia","Tareas antes de salir","Seguro de viaje","Dónde alojarse por barrios","Frases útiles en el idioma local"]],
+   ["Recuerdos",["Mis fotos del viaje","Mi video del viaje"]]]},
   {id:"reservas",c:"Reservas hechas",l:"¿Ya tienes entradas o reservas hechas?",ty:"radio",o:["No","Sí, te las mando por WhatsApp"]},
   {id:"comentarios",c:"Comentarios",l:"¿Algo más que quieras contarme?",h:"Opcional",ty:"textarea"}]},
  {t:"Resumen",final:true}
@@ -310,6 +316,7 @@ function nombresApp(){
   const w=lugar||"Viaje";if(/familia/.test(g))out.push(w+" en familia");else if(/pareja/.test(g)&&!/Luna/.test(mo))out.push(w+" en pareja");else if(/amigos/.test(g))out.push(w+" con amigos");
   return [...new Set(out)].filter(x=>x.length<=34).slice(0,4)}
 function field(q){
+  if(q.id==="app_cosas"&&/cuenta|mezcla/i.test(A.modo||"")&&!A._agAuto){A.app_cosas=[...new Set([...(A.app_cosas||[]),"Cambiar la agenda a mi ritmo"])];A._agAuto=1}
   if(q.sug){const ns=nombresApp(),h0=field0(q);return ns.length?h0.replace(/<\/div>$/,`<div class="chips nsug" aria-label="Ideas de nombre">${ns.map(n=>`<button type="button" class="chip${A[q.id]===n?" on":""}" data-nom="${esc(n)}">${esc(n)}</button>`).join("")}</div></div>`):h0}
   if(q.dyn){q.o=[...destList(),q.none];if(Array.isArray(A[q.id]))A[q.id]=A[q.id].filter(x=>q.o.includes(x))}
   if(q.ty==="route")return `<div class="q" id="ruta-box">${rutaHTML()}</div>`;
@@ -325,7 +332,7 @@ function field0(q){
   if(q.ty==="chips"||q.ty==="radio"){
     const typ=q.ty==="chips"?"checkbox":"radio";
     const chip=o=>{const on=typ==="checkbox"?(v||[]).includes(o):v===o;return `<label class="chip"><input type="${typ}" name="${q.id}" value="${esc(o)}"${on?" checked":""}>${esc(o)}</label>`};
-    if(q.g)return `<fieldset class="q" style="border:0;padding:0"><legend class="lab" style="padding:0;font-weight:600;margin-bottom:8px">${esc(q.l)}${h}</legend>${q.g.map(([t,os])=>`<div class="cgrp">${esc(t)}</div><div class="chips">${os.map(chip).join("")}</div>`).join("")}</fieldset>`;
+    if(q.g)return `<fieldset class="q" style="border:0;padding:0"><legend class="lab" style="padding:0;font-weight:600;margin-bottom:8px">${esc(q.l)}${h}</legend>${q.inc?`<p class="incl"><b>Siempre incluye</b>${esc(q.inc)}</p>`:""}${q.g.map(([t,os])=>`<div class="cgrp">${esc(t)}</div><div class="chips">${os.map(chip).join("")}</div>`).join("")}</fieldset>`;
     return `<fieldset class="q" style="border:0;padding:0"><legend class="lab" style="padding:0;font-weight:600;margin-bottom:8px">${esc(q.l)}${h}</legend><div class="chips">${q.o.map(o=>{
       const on=typ==="checkbox"?(v||[]).includes(o):v===o;
       return `<label class="chip"><input type="${typ}" name="${q.id}" value="${esc(o)}"${on?" checked":""}>${esc(o)}</label>`}).join("")}</div></fieldset>`;

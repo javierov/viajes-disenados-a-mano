@@ -113,10 +113,32 @@ const pintaStars=()=>{const v=+(document.querySelector("[name=estrellas]:checked
 $("stars").addEventListener("change",pintaStars);
 
 const chips=(id,name,opts,type)=>$(id).innerHTML=opts.map(o=>`<label class="chip"><input type="${type}" name="${name}" value="${esc(o)}">${esc(o)}</label>`).join("");
-chips("uso","uso",["El plan del día","Mapa","Dónde estoy","Cerca de mí","Comer","Tiempo y ropa","Gastos","Mis fotos o video","Otra cosa"],"checkbox");
+// Secciones de cada app: ?s=plan,mapa,comer… (lo pone el botón de la app); si no, la lista de abajo por nombre de app; si no, una lista general.
+const SEC={plan:"El plan del día",mapa:"Mapa",donde:"Dónde estoy",cerca:"Cerca de mí",comer:"Comer",tiempo:"Tiempo y ropa",gastos:"Gastos",
+  conversor:"Conversor de monedas",reservas:"Mis reservas",trayectos:"Trayectos y horarios",vuelos:"Mis vuelos",tareas:"Antes de salir",
+  emergencias:"Teléfonos de emergencia",secretos:"Lugares secretos",excursiones:"Excursiones",frases:"Frases útiles",seguro:"Seguro de viaje",
+  agenda:"Cambiar la agenda",fotos:"Mis fotos",video:"Mi video",maleta:"La maleta"};
+const POR_APP={ // nombre exacto de la app → sus secciones (para el correo automático)
+  "Escapada a Toledo":"plan,mapa,donde,comer",
+  "Mis Vacaciones":"plan,mapa,donde,cerca,comer,Moda,tiempo,gastos,agenda",
+  "Lisboa y Oporto":"plan,vuelos,mapa,donde,gastos",
+  "Cancun 2026":"plan,vuelos,mapa,donde,comer,tiempo,gastos,conversor,emergencias"};
+const GENERAL="plan,mapa,donde,comer,tiempo,gastos,fotos";
+const usoOpts=(P.get("s")||POR_APP[APP]||GENERAL).split(",").map(x=>x.trim()).filter(Boolean)
+  .map(x=>SEC[x.toLowerCase()]||x.slice(0,40)).filter((x,i,a)=>a.indexOf(x)===i).slice(0,16);
+chips("uso","uso",[...usoOpts,"Otra cosa"],"checkbox");
 chips("agenda","agenda",["Nada","Algunos días","Casi todo"],"radio");
 if(MODO==="c")$("agQ").hidden=false;
-chips("precio","precio",["Solo la usaría gratis","Menos de 20 €","De 20 a 50 €","De 50 a 100 €","Más de 100 €"],"radio");
+// Moneda según dónde está el móvil: Chile → pesos, Unión Europea → euros, resto → dólares (o ?c=CLP|EUR|USD)
+const MON=(()=>{const c=(P.get("c")||"").toUpperCase();if(["CLP","EUR","USD"].includes(c))return c;
+  let z="";try{z=Intl.DateTimeFormat().resolvedOptions().timeZone||""}catch(e){}
+  if(/^(America\/(Santiago|Punta_Arenas)|Pacific\/Easter|Chile\/)/.test(z))return "CLP";
+  const fueraUE=/^Europe\/(London|Guernsey|Jersey|Isle_of_Man|Zurich|Oslo|Istanbul|Moscow|Kiev|Kyiv|Minsk|Belgrade|Sarajevo|Skopje|Tirane|Chisinau|Podgorica|Kaliningrad|Samara|Volgograd|Saratov|Ulyanovsk|Astrakhan|Kirov|Simferopol|Gibraltar|Andorra|Monaco|San_Marino|Vatican|Vaduz)/;
+  if((/^Europe\//.test(z)&&!fueraUE.test(z))||/^Atlantic\/(Canary|Madeira|Azores)/.test(z))return "EUR";
+  return "USD"})();
+const PRECIOS={CLP:["Menos de $20.000","De $20.000 a $50.000","De $50.000 a $100.000","Más de $100.000"],
+  EUR:["Menos de 20 €","De 20 a 50 €","De 50 a 100 €","Más de 100 €"],USD:["Menos de US$20","De US$20 a 50","De US$50 a 100","Más de US$100"]}[MON];
+chips("precio","precio",["Solo la usaría gratis",...PRECIOS],"radio");
 chips("publicar","publicar",["Sí, con mi nombre","Sí, solo con mis iniciales","No, es solo para ti"],"radio");
 $("nps").innerHTML=[...Array(11).keys()].map(n=>`<label><input type="radio" name="nps" value="${n}">${n}</label>`).join("");
 
