@@ -159,7 +159,7 @@ $("send").onclick=async()=>{
     estrellas:+est,uso:[...document.querySelectorAll("[name=uso]:checked")].map(x=>x.value).join(", "),
     mejorar:$("mejorar").value.trim(),agenda:val("agenda"),nps:val("nps"),precio:val("precio"),comentario:com,publicar:pub,
     firma:pub.startsWith("Sí")?$("firma").value.trim():""};
-  if(!/(^|\.)github\.io$/.test(location.hostname)){err.textContent="Versión de taller: aquí no se envía. En la web publicada sí.";return}
+  if(!/(^|\.)(github\.io|pages\.dev)$/.test(location.hostname)){err.textContent="Versión de taller: aquí no se envía. En la web publicada sí.";return}
   const b=$("send");b.disabled=true;b.textContent="Enviando…";
   try{const r=await fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(d)});const j=await r.json();
     if(!j.ok)throw new Error(j.error||"x");
@@ -172,7 +172,7 @@ $("send").onclick=async()=>{
 <script>
 /* Estadísticas anónimas para Javier (GoatCounter). Sin cookies ni datos personales. Solo en github.io. */
 (function(){
-  var H=location.hostname;if(!/(^|\.)github\.io$/.test(H))return;
+  var H=location.hostname;if(!/(^|\.)(github\.io|pages\.dev)$/.test(H))return;
   var Q=location.search;try{if(/[?&]yo\b/.test(Q))localStorage.setItem("javierov-nostats","1");if(localStorage.getItem("javierov-nostats"))return}catch(e){}
   var demo="";try{var m=Q.match(/[?&]de=([^&]+)/);if(m){var d=decodeURIComponent(m[1]);if(d==="no")localStorage.removeItem("javierov-demo");else localStorage.setItem("javierov-demo",d)}demo=localStorage.getItem("javierov-demo")||""}catch(e){}
   var APP="Encuesta",seen={};
