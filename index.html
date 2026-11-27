@@ -277,6 +277,27 @@ const STEPS=[
  {t:"Resumen",final:true}
 ];
 for(const st of STEPS)for(const q of st.f||[])if(q.g)q.o=q.g.flatMap(x=>x[1]);
+/* Versión rápida (?r=1): para viajeros que ya conocemos; solo itinerario, hoteles y presupuesto */
+const RAP=new URLSearchParams(location.search).get("r")==="1";
+if(RAP){const F=(id,o)=>Object.assign({},STEPS.flatMap(s=>s.f||[]).find(q=>q.id===id),o||{}),SIH=["hotel_busca",["Sí, todos","Solo algunos"]];
+ STEPS.splice(0,STEPS.length,
+ {t:"Hola",intro:true},
+ {t:"Tu viaje",d:"Lo justo para armar tu itinerario.",f:[F("nombre"),F("email"),F("destino"),
+  {id:"plan_unico",single:1,c:"Qué quiere hacer allí",l:"¿Qué quieres hacer allí?",ty:"radio",o:["Quedarme en la ciudad","Quedarme y hacer alguna excursión","Recorrer la zona"]}]},
+ {t:"Fechas",d:"Aunque sean aproximadas.",f:[F("llegada"),F("salida"),F("flex")]},
+ {t:"Tu ruta",multi:true,d:"Pon las ciudades en orden y dime cuántas noches duermes en cada una. Si quieres una escala para descansar, añádela como una ciudad más.",f:[F("ruta"),F("entre"),
+  {id:"excursiones_m",c:"Excursiones desde",l:"¿Desde qué ciudad quieres hacer excursiones o recorrer la zona?",h:"Marca las que quieras",ty:"chips",dyn:1,none:"En ninguna, nos quedamos en las ciudades",o:[]}]},
+ {t:"Hoteles",d:"Si ya tienes alguno, perfecto: me lo cuentas.",f:[
+  {id:"hotel_busca",c:"Busca hotel",l:"¿Te busco los hoteles?",ty:"radio",o:["Sí, todos","Solo algunos","No, ya los tengo"]},
+  F("aloj_tipo",{if:SIH}),
+  {id:"hotel_estilo",c:"Estilo de hotel",l:"¿Cómo te gustan los hoteles?",ty:"chips",if:SIH,o:["Céntrico","Tranquilo","Boutique o con encanto","Cadena conocida","Con vista","Con piscina","De lujo"]},
+  F("aloj_precio",{if:SIH})]},
+ {t:"Lo demás",d:"Último paso.",f:[
+  {id:"servicios",c:"Quiere que le organice",l:"¿Qué más quieres que te organice?",ty:"chips",none:"Nada, vamos libres",o:["Vuelos o trenes entre ciudades","Traslados","Excursiones con guía","Entradas","Nada, vamos libres"]},
+  {id:"presu_total",c:"Presupuesto total",l:"Presupuesto aproximado del viaje",h:"Opcional. Por persona o en total, como te sea más fácil",ty:"text"},
+  F("motivo"),F("fecha_especial"),F("lugares"),F("comentarios")]},
+ {t:"Resumen",final:true});
+ for(const st of STEPS)for(const q of st.f||[])if(q.multiOnly)delete q.multiOnly}
 const destList=()=>String(A.destino||"").split(",").map(x=>x.trim()).filter(Boolean);
 const isMulti=()=>destList().length>1;
 for(const st of STEPS)for(const q of st.f||[])if(st.multi)q.multiOnly=1;
@@ -284,7 +305,7 @@ const vis=i=>!STEPS[i].multi||isMulti();
 const shown=q=>{if(q.single&&isMulti())return false;if(q.multiOnly&&!isMulti())return false;if(!q.if)return true;const v=A[q.if[0]];if(q.if[1]==="algo")return Array.isArray(v)&&v.some(x=>x!=="En ninguna");if(q.if[1]===">0")return +v>0;return Array.isArray(v)?v.some(x=>q.if[1].includes(x)):q.if[1].includes(v)};
 function updIf(){for(const el of f.querySelectorAll("[data-if]")){const q=STEPS[cur].f.find(x=>x.id===el.dataset.if);el.hidden=!shown(q)}}
 
-const KEY="cuestionario-viaje-v2";let A={};try{A=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}
+const KEY="cuestionario-viaje-v2"+(RAP?"-r":"");let A={};try{A=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}
 let cur=0;try{cur=+localStorage.getItem(KEY+"-p")||0}catch(e){}
 if(cur>=STEPS.length)cur=0;
 if(A.estilo==="Luminoso")A.estilo="Luminoso azul";
@@ -385,6 +406,9 @@ function render(){try{const st=STEPS[cur];window.tvdmStat&&window.tvdmStat(st.in
     h=`<h1>Tu viaje, diseñado a mano</h1>
     <p class="lead">Una app creada solo para ti. Con tus respuestas diseñaré tu propia app de viaje, con tu itinerario, tus lugares en el mapa, cómo moverte y todo lo práctico, y con detalles pensados para ti. Sirve para cualquier viaje: una ciudad, un tour, una ruta a pie o una aventura.</p>
     <p>Son ${n} pasos cortos, unos 5 minutos, y casi todo se contesta tocando opciones. Solo son obligatorios tu nombre y tu email. Si algo no lo sabes, déjalo en blanco: lo vemos juntos después.</p>`;
+    if(RAP)h=`<h1>Tu viaje, diseñado a mano</h1>
+    <p class="lead">Unas preguntas cortas para armar tu itinerario: destinos, fechas, hoteles y presupuesto.</p>
+    <p>Son ${n} pasos, unos 2 minutos, y casi todo se contesta tocando. Solo son obligatorios tu nombre y tu email. Si algo no lo sabes, déjalo en blanco.</p>`;
   }else if(s.final){
     const txt=summary(),sent=getSent(),same=sent&&sent.hash===JSON.stringify(A);
     const when=sent?new Date(sent.at).toLocaleString("es-ES",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"}):"";
@@ -422,8 +446,8 @@ async function sendNow(){
   let t0=0;try{t0=+localStorage.getItem(KEY+"-t0")||0}catch(e){}
   let id="";try{id=localStorage.getItem(KEY+"-id")||"";if(!id){id=Date.now().toString(36)+Math.random().toString(36).slice(2,8);localStorage.setItem(KEY+"-id",id)}}catch(e){id="x"+Date.now().toString(36)}
   const out={...A};delete out._ruta;out.ruta=rutaTexto();for(const st of STEPS)for(const q of st.f||[])if(!shown(q))out[q.id]="";
-  if(isMulti()){const ds=destList(),m=(A.ya_estuvo_m||[]).filter(x=>ds.includes(x)||x==="En ninguna");out.ya_estuvo=m.join(", ");out.ya_vio=out.ya_vio_m||""}delete out.ya_estuvo_m;delete out.ya_vio_m;
-  const body=JSON.stringify({...out,_hp:document.getElementById("web").value,_secs:t0?Math.round((Date.now()-t0)/1000):0,_id:id,_cols:STEPS.flatMap(st=>(st.f||[]).filter(q=>!/_m$/.test(q.id)).map(q=>[q.id,q.c||q.l])),_resumen:STEPS.filter((st,i)=>st.f&&vis(i)).map(st=>[st.t,st.f.filter(shown).map(q=>[q.c||q.l,val(q)]).filter(r=>r[1])]).filter(x=>x[1].length)});
+  if(isMulti()){const ds=destList(),m=(A.ya_estuvo_m||[]).filter(x=>ds.includes(x)||x==="En ninguna");out.ya_estuvo=m.join(", ");out.ya_vio=out.ya_vio_m||""}delete out.ya_estuvo_m;delete out.ya_vio_m;if(RAP){out.excursiones=(A.excursiones_m||[]).join(", ");delete out.excursiones_m}out.version=RAP?"Rápida":"Completa";
+  const body=JSON.stringify({...out,_hp:document.getElementById("web").value,_secs:t0?Math.round((Date.now()-t0)/1000):0,_id:id,_cols:[...STEPS.flatMap(st=>(st.f||[]).filter(q=>!/_m$/.test(q.id)).map(q=>[q.id,q.c||q.l])),...(RAP?[["excursiones","Excursiones desde"]]:[]),["version","Versión"]],_resumen:STEPS.filter((st,i)=>st.f&&vis(i)).map(st=>[st.t,st.f.filter(shown).map(q=>[q.c||q.l,val(q)]).filter(r=>r[1])]).filter(x=>x[1].length)});
   if(!/(^|\.)(github\.io|pages\.dev)$/.test(location.hostname)){pb.disabled=false;pb.textContent="Enviar mis respuestas";ok.style.color="var(--red)";ok.textContent="Versión de taller: el envío solo funciona desde el enlace de GitHub.";return}
   try{
     if(!CONFIG.endpoint)throw new Error("sin conexión configurada");
